@@ -20,6 +20,7 @@ const reportRequestValidator = {
                     updatedon: Joi.string().optional(),
                     createdby: Joi.string().required(),
                     type: Joi.string().valid("private", "public").required(),
+                    report_type: Joi.string().valid("report", "dataset").optional(),
                     status: Joi.string()
                         .valid("draft")
                         .trim()
@@ -70,6 +71,7 @@ const reportRequestValidator = {
                     updatedon: Joi.string().optional(),
                     createdby: Joi.string().optional(),
                     type: Joi.string().valid("private", "public").optional(),
+                    report_type: Joi.string().valid("report", "dataset").optional(),
                     status: Joi.string()
                         .valid("live", "draft", "retired")
                         .trim()
