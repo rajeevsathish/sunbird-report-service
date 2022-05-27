@@ -1,0 +1,110 @@
+{
+    "REPORT": {
+        "LIST": {
+            "URL": "/list",
+            "API_ID": "api.report.read",
+            "VALIDATE": {
+                "KEY": "report:search",
+                "PATH": "body"
+            }
+        },
+        "CREATE": {
+            "URL": "/create",
+            "API_ID": "api.report.create",
+            "VALIDATE": {
+                "KEY": "report:create",
+                "PATH": "body"
+            }
+        },
+        "READ": {
+            "URL": "/get/:reportid",
+            "API_ID": "api.report.read"
+        },
+        "READ_HASH": {
+            "URL": "/get/:reportid/:hash",
+            "API_ID": "api.report.read"
+        },
+        "DELETE": {
+            "URL": "/delete/:reportid",
+            "API_ID": "api.report.delete"
+        },
+        "DELETE_HASH": {
+            "URL": "/delete/:reportid/:hash",
+            "API_ID": "api.report.delete"
+        },
+        "UPDATE": {
+            "URL": "/update/:reportid",
+            "API_ID": "api.report.update",
+            "VALIDATE": {
+                "KEY": "report:update",
+                "PATH": "body"
+            }
+        },
+        "PUBLISH": {
+            "URL": "/publish/:reportid",
+            "API_ID": "api.report.publish"
+        },
+        "PUBLISH_HASH": {
+            "URL": "/publish/:reportid/:hash",
+            "API_ID": "api.report.publish"
+        },
+        "RETIRE": {
+            "URL": "/retire/:reportid",
+            "API_ID": "api.report.retire"
+        },
+        "RETIRE_HASH": {
+            "URL": "/retire/:reportid/:hash",
+            "API_ID": "api.report.retire"
+        },
+        "READ_WITH_DATASETS": {
+            "URL": "/datasets/get/:reportid",
+            "API_ID": "api.report.read"
+        }
+    },
+    "SUMMARY": {
+        "LIST": {
+            "URL": "/list",
+            "API_ID": "api.report.summary.list",
+            "VALIDATE": {
+                "KEY": "summary:list",
+                "PATH": "body"
+            }
+        },
+        "CREATE": {
+            "URL": "/create",
+            "API_ID": "api.report.summary.create",
+            "VALIDATE": {
+                "KEY": "summary:create",
+                "PATH": "body"
+            }
+        },
+        "LATEST_REPORT_SUMMARY": {
+            "URL": "/:reportid",
+            "API_ID": "api.report.summary.get"
+        },
+        "LATEST_CHART_SUMMARY": {
+            "URL": "/:reportid/:chartid",
+            "API_ID": "api.report.summary.get"
+        }
+    },
+    "ORG": {
+        "SEARCH": {
+            "URL": "/api/org/v1/ext/search"
+        }
+    },
+    "LOCATION": {
+        "SEARCH": {
+            "URL": "/data/v1/location/search"
+        }
+    },
+    "CHANNEL": {
+        "READ": {
+            "URL": "/channel/v1/read"
+        }
+    },
+    "FRAMEWORK": {
+        "READ": {
+            "URL": "/framework/v1/read"
+        }
+    }
+}

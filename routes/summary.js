@@ -1,34 +1,31 @@
 const Router = require('express-promise-router');
+
+const { listSummaries, createSummary, getLatestSummary } = require('../controllers/summary');
+const { setApiResponseId } = require('../middleware/utils/setApiResponseId');
+const validate = require('../middleware/validators');
+const { SUMMARY } = require('../resources/routes.json');
+
 const router = new Router();
-
-const { listSummaries, createSummary, getChartSummary, getReportSummary } = require('../controllers/report-summary');
-
-const { validateListSummaryAPI, validateCreateSummaryAPI, setApiResponseId, sendResponse } = require('../middlewares');
-
 module.exports = router;
 
-router.post("/list",
-    setApiResponseId("api.report.summary.list"),
-    validateListSummaryAPI,
-    listSummaries,
-    sendResponse
+router.post(SUMMARY.LIST.URL,
+    setApiResponseId(SUMMARY.LIST.API_ID),
+    validate(SUMMARY.LIST.VALIDATE.KEY, SUMMARY.LIST.VALIDATE.PATH),
+    listSummaries
 );
 
-router.post("/create",
-    setApiResponseId("api.report.summary.create"),
-    validateCreateSummaryAPI,
-    createSummary,
-    sendResponse
+router.post(SUMMARY.CREATE.URL,
+    setApiResponseId(SUMMARY.CREATE.API_ID),
+    validate(SUMMARY.CREATE.VALIDATE.KEY, SUMMARY.CREATE.VALIDATE.PATH),
+    createSummary
 );
 
-router.get("/:reportid",
-    setApiResponseId("api.report.summary.get"),
-    getReportSummary,
-    sendResponse
+router.get(SUMMARY.LATEST_REPORT_SUMMARY.URL,
+    setApiResponseId(SUMMARY.LATEST_REPORT_SUMMARY.API_ID),
+    getLatestSummary
 )
 
-router.get("/:reportid/:chartid",
-    setApiResponseId("api.report.summary.get"),
-    getChartSummary,
-    sendResponse
+router.get(SUMMARY.LATEST_CHART_SUMMARY.URL,
+    setApiResponseId(SUMMARY.LATEST_CHART_SUMMARY.API_ID),
+    getLatestSummary
 )

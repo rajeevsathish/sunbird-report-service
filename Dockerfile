@@ -4,4 +4,4 @@ RUN apk update \
 COPY . /opt/report/
 WORKDIR /opt/report/
 RUN npm install
-CMD ["node", "app.js", "&"]
+CMD ["npm", "run", "start", "&"]
