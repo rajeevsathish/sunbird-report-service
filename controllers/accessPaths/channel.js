@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user's channel
+ * 
+ */
+
 module.exports = {
     ruleName: 'channel',
     isMatch(user, payload) {

@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user's district location
+ * 
+ */
+
 module.exports = {
     ruleName: 'district',
     isMatch(user, payload) {

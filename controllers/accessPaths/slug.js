@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's slug value
+ * 
+ */
+
 module.exports = {
     ruleName: 'slug',
     isMatch(user, payload) {

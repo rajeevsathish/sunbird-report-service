@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's userid value
+ * 
+ */
+
 module.exports = {
     ruleName: 'userId',
     isMatch(user, payload) {

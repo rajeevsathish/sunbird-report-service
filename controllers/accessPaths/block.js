@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user block location
+ * 
+ */
+
 module.exports = {
     ruleName: 'block',
     isMatch(user, payload) {

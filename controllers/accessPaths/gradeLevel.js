@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user's gradeLevel
+ * 
+ */
+
 module.exports = {
     ruleName: 'gradeLevel',
     isMatch(user, payload) {

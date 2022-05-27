@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's medium
+ * 
+ */
+
 module.exports = {
     ruleName: 'medium',
     isMatch(user, payload) {

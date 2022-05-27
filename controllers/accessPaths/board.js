@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user's board
+ * 
+ */
+
 module.exports = {
     ruleName: 'board',
     isMatch(user, payload) {

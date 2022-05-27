@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's state value
+ * 
+ */
+
 module.exports = {
     ruleName: 'state',
     isMatch(user, payload) {

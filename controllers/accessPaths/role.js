@@ -1,5 +1,11 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's roles
+ * 
+ */
+
+
 module.exports = {
     ruleName: 'role',
     isMatch(user, payload) {

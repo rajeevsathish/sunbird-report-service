@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition for user's framework
+ * 
+ */
+
 module.exports = {
     ruleName: 'framework',
     isMatch(user, payload) {

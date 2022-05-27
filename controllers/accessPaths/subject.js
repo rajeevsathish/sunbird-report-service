@@ -1,5 +1,10 @@
 const _ = require('lodash');
 
+/**
+ * @description accesspath rule definition of user's subjects value
+ * 
+ */
+
 module.exports = {
     ruleName: 'subject',
     isMatch(user, payload) {

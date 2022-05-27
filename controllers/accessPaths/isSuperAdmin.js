@@ -1,6 +1,12 @@
 const _ = require('lodash');
 const { envVariables } = require('../../helpers/envHelpers');
 
+/**
+ * @description accesspath rule definition whether user is superadmin or not
+ * 
+ */
+
+
 module.exports = {
     ruleName: 'isSuperAdmin',
     isMatch(user, payload) {

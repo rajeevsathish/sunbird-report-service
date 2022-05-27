@@ -5,6 +5,13 @@ const { report_summary, report_status } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
 
+/**
+ * @description controller to read a report/chart summary
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const createSummary = async (req, res, next) => {
     try {
         const { summary } = req.body.request;
@@ -35,6 +42,13 @@ const createSummary = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller to list all the report or chart summaries
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const listSummaries = async (req, res, next) => {
     try {
 
@@ -55,7 +69,7 @@ const listSummaries = async (req, res, next) => {
 }
 
 /**
- * @description This controller method is used to fetch the latest report summary
+ * @description This controller method is used to fetch the latest report/chart summary
  */
 const getLatestSummary = async (req, res, next) => {
     try {

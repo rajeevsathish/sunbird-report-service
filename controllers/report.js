@@ -13,6 +13,13 @@ const { getDatasets } = require("./parameters");
 // checks by reportid if the report exists in our database or not
 const reportExists = async (reportid) => report.findOne({ where: { reportid } });
 
+/**
+ * @description controller for searching of the reports. If user token is not passed return only public reports else filter the reports based on the accesspath set.
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const search = async (req, res, next) => {
     try {
         const { filters = {}, options = { showChildren: true } } = req.body.request;
@@ -67,6 +74,13 @@ const search = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller for the creation of report
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const create = async (req, res, next) => {
     try {
         const { report: reportMeta } = req.body.request;
@@ -85,6 +99,13 @@ const create = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller for the deletion of report
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const remove = async (req, res, next) => {
     try {
         const { reportid, hash } = req.params;
@@ -137,6 +158,13 @@ const remove = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller to read a report metadata with or without access path
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const read = async (req, res, next) => {
     try {
         const { reportid, hash } = _.get(req, "params");
@@ -181,6 +209,13 @@ const read = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller to update a report metadata.
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const update = async (req, res, next) => {
     try {
         const { reportid } = _.get(req, "params");
@@ -206,6 +241,13 @@ const update = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller to publish a report live.
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const publish = async (req, res, next) => {
     try {
         const { reportid, hash } = req.params;
@@ -304,6 +346,13 @@ const deactivateAllJobsForReport = async jobIds => {
     }
 }
 
+/**
+ * @description controller to retire a report.
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const retire = async (req, res, next) => {
     try {
         const { reportid, hash } = req.params;
@@ -368,6 +417,13 @@ const retire = async (req, res, next) => {
     }
 }
 
+/**
+ * @description controller to read a report metadata along with it's datasets files
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @return {*} 
+ */
 const readWithDatasets = async (req, res, next) => {
     try {
         const { reportid, hash } = _.get(req, "params");
