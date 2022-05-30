@@ -15,7 +15,7 @@ const db = {};
 let sequelize;
 debug(config);
 if (config.use_env_variable) {
-  sequelize = new Sequelize(DB.NAME, DB.USER, DB.PASSWORD, { ...config, operatorsAliases: aliasDefinitions });
+  sequelize = new Sequelize(DB.NAME, DB.USER, DB.PASSWORD, { ...config, host: DB.HOST, operatorsAliases: aliasDefinitions });
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, { ...config, operatorsAliases: aliasDefinitions });
 }
