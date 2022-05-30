@@ -19,7 +19,7 @@ const printEnvVariablesStatus = () => {
         }(envVariables)
 
     );
-    console.table(result);
+    console.log(JSON.stringify(result));
 }
 
 const envVariables = {
