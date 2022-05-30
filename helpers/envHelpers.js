@@ -5,6 +5,23 @@ const fs = require('fs');
 
 const packageObj = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
+const printEnvVariablesStatus = () => {
+    const result = Object.assign(
+        {},
+        ...function _flatten(object) {
+            return [].concat(...Object.keys(object)
+                .map(key =>
+                    typeof object[key] === 'object' ?
+                        _flatten(object[key]) :
+                        ({ [key]: object[key] })
+                )
+            );
+        }(envVariables)
+
+    );
+    console.table(result);
+}
+
 const envVariables = {
     DB: {
         HOST: env.SUNBIRD_REPORTS_DB_HOST || 'localhost',
@@ -47,4 +64,4 @@ const envVariables = {
     }
 }
 
-module.exports = { envVariables, packageObj };
+module.exports = { envVariables, packageObj, printEnvVariablesStatus };

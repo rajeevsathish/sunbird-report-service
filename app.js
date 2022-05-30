@@ -7,6 +7,7 @@ var debug = require('debug')('report-service:server');
 const mountRoutes = require('./routes')
 const app = express();
 const { sequelize } = require('./models');
+const { printEnvVariablesStatus } = require('./helpers/envHelpers');
 
 app.use(logger('dev'));
 app.use(express.json({ limit: '1mb' }));
@@ -17,6 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //connect to the database and mount routes
 (async () => {
     try {
+        printEnvVariablesStatus();
         await sequelize.authenticate();
         // await sequelize.sync();
         debug('Connected to the database');
