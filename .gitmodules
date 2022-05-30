@@ -1,0 +1,4 @@
+[submodule "libs"]
+	path = libs
+	url = https://github.com/project-sunbird/sunbird-js-utils
+	branch = release-4.8.0

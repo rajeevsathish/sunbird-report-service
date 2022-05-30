@@ -1,11 +1,9 @@
 {
   "name": "hawkeye-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production DEBUG=* node ./bin/www",
+    "dev": "DEBUG=* nodemon ./bin/www"
   },
   "engines": {
     "node": ">=7.8.0"
@@ -20,17 +18,27 @@
   "author": "ravinder kumar",
   "license": "MIT",
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
-    "axios": "^0.19.2",
-    "body-parser": "^1.19.0",
-    "dateformat": "^3.0.3",
-    "express": "^4.17.1",
-    "express-promise-router": "^3.0.3",
-    "lodash": "^4.17.15",
-    "pg": "^8.0.0",
-    "uuid": "^7.0.3"
+    "axios": "^0.27.2",
+    "azure-storage": "^2.10.7",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "express-promise-router": "^4.1.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "joi": "^17.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "memory-cache": "^0.2.0",
+    "morgan": "~1.9.1",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sb_api_interceptor": "file:libs/sb_api_interceptor",
+    "sequelize": "^6.19.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "nodemon": "^2.0.16",
+    "sequelize-cli": "^6.4.1"
   }
 }
