@@ -2,7 +2,7 @@
   "name": "hawkeye-server",
   "version": "1.0.0",
   "scripts": {
-    "start": "cross-env NODE_ENV=production DEBUG=* node ./bin/www",
+    "start": "cross-env DEBUG=* node ./bin/www",
     "dev": "cross-env DEBUG=* nodemon ./bin/www"
   },
   "engines": {
