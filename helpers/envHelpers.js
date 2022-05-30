@@ -5,6 +5,23 @@ const fs = require('fs');
 
 const packageObj = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
+const printEnvVariablesStatus = () => {
+    const result = Object.assign(
+        {},
+        ...function _flatten(object) {
+            return [].concat(...Object.keys(object)
+                .map(key =>
+                    typeof object[key] === 'object' ?
+                        _flatten(object[key]) :
+                        ({ [key]: object[key] })
+                )
+            );
+        }(envVariables)
+
+    );
+    console.table(result);
+}
+
 const envVariables = {
     DB: {
         HOST: env.SUNBIRD_REPORTS_DB_HOST || 'localhost',
@@ -14,6 +31,10 @@ const envVariables = {
         USER: env.SUNBIRD_REPORTS_DB_USER || 'root'
     },
     SERVER_PORT: env.SUNBIRD_SERVER_PORT || 3030,
+    BASE_REPORT_URL: get(env, 'SUNBIRD_BASE_REPORT_URL') || 'report',
+    TABLE_NAME: get(env, 'SUNBIRD_REPORTS_TABLE_NAME') || 'report',
+    SUMMARY_TABLE_NAME: get(env, 'SUNBIRD_REPORT_SUMMARY_TABLE_NAME') || 'report_summary',
+    REPORT_STATUS_TABLE_NAME: get(env, 'SUNBIRD_REPORT_STATUS_TABLE_NAME') || 'report_status',
     ENV: env.SUNBIRD_ENV || 'https://dev.sunbirded.org',
     DEACTIVATE_JOB_API: {
         HOST: env.DEACTIVATE_JOB_API_HOST || '',
@@ -43,4 +64,4 @@ const envVariables = {
     }
 }
 
-module.exports = { envVariables, packageObj };
+module.exports = { envVariables, packageObj, printEnvVariablesStatus };
