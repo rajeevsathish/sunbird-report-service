@@ -2,8 +2,8 @@
   "name": "hawkeye-server",
   "version": "1.0.0",
   "scripts": {
-    "start": "NODE_ENV=production DEBUG=* node ./bin/www",
-    "dev": "DEBUG=* nodemon ./bin/www"
+    "start": "cross-env NODE_ENV=production DEBUG=* node ./bin/www",
+    "dev": "cross-env DEBUG=* nodemon ./bin/www"
   },
   "engines": {
     "node": ">=7.8.0"
@@ -21,6 +21,7 @@
     "axios": "^0.27.2",
     "azure-storage": "^2.10.7",
     "cookie-parser": "~1.4.4",
+    "cross-env": "^7.0.3",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-promise-router": "^4.1.1",
