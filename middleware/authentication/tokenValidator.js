@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const _ = require('lodash');
+var debug = require('debug')('middleware:authentication:tokenValidator');
 
 const { validateJwtToken } = require('../../helpers/token_validation');
 
@@ -24,11 +25,13 @@ function verifyToken({ tokenRequired = true }) {
             const { status, result, error } = await validateJwtToken(token);
 
             if (status === 'failed' && error) {
+                debug('Token verification failed', JSON.stringify(error));
                 return next(createError(401, error.message));
             }
 
             if (status === 'success' && result) {
                 const sub = _.get(result, 'payload.sub');
+                debug('Token verification success', JSON.stringify(result));
                 if (sub) {
                     var [, , userId] = sub.split(':');
                     if (userId) {
@@ -41,6 +44,7 @@ function verifyToken({ tokenRequired = true }) {
             next();
 
         } catch (error) {
+            debug('Token verification failed', JSON.stringify(error));
             return next(createError(401, 'unauthorized access'));
         }
     }

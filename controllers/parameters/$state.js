@@ -1,4 +1,6 @@
 const _ = require('lodash');
+var debug = require('debug')('parameters:$state');
+
 const { locationSearch } = require("../../helpers/learnerHelper");
 
 module.exports = {
@@ -12,6 +14,7 @@ module.exports = {
             const result = response.data;
             return _.map(_.get(result, 'result.response') || [], 'name');
         } catch (error) {
+            debug(` ${this.name} masterData fetch failed`, JSON.stringify(error));
             return [];
         }
     }

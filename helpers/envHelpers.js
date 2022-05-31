@@ -2,24 +2,12 @@
 const { get } = require('lodash');
 const env = get(process, 'env');
 const fs = require('fs');
+var debug = require('debug')('parameters:$board');
 
 const packageObj = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 const printEnvVariablesStatus = () => {
-    const result = Object.assign(
-        {},
-        ...function _flatten(object) {
-            return [].concat(...Object.keys(object)
-                .map(key =>
-                    typeof object[key] === 'object' ?
-                        _flatten(object[key]) :
-                        ({ [key]: object[key] })
-                )
-            );
-        }(envVariables)
-
-    );
-    console.log(JSON.stringify(result));
+    debug('Service environment variables', JSON.stringify(envVariables));
 }
 
 const envVariables = {

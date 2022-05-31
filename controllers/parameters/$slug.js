@@ -1,4 +1,6 @@
 const _ = require('lodash');
+var debug = require('debug')('parameters:$slug');
+
 const { orgSearch } = require("../../helpers/orgHelper");
 
 module.exports = {
@@ -20,6 +22,7 @@ module.exports = {
             const result = response.data;
             return _.map(_.get(result, 'result.response.content') || [], 'slug');
         } catch (error) {
+            debug(` ${this.name} masterData fetch failed`, JSON.stringify(error));
             return [];
         }
     }
