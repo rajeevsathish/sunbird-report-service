@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const createError = require('http-errors');
-var debug = require('debug')('report-service:server');
+var debug = require('debug')('controllers:report');
 const _ = require('lodash');
 const axios = require('axios');
 
@@ -70,6 +70,7 @@ const search = async (req, res, next) => {
         }
         return res.status(200).json(formatApiResponse({ id: req.id, result: { reports: filteredReports, count: filteredReports.length } }));
     } catch (error) {
+        debug('search failed', JSON.stringify(error));
         return next(createError(500, error));
     }
 }
@@ -95,6 +96,7 @@ const create = async (req, res, next) => {
         }));
 
     } catch (error) {
+        debug('create failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -154,6 +156,7 @@ const remove = async (req, res, next) => {
 
         return res.status(200).json(formatApiResponse({ id: req.id, result: { reportid, ...(hash && { hash }) } }));
     } catch (error) {
+        debug('remove failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -205,6 +208,7 @@ const read = async (req, res, next) => {
 
         return res.json(formatApiResponse({ id: req.id, result: document }));
     } catch (error) {
+        debug('read failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -237,6 +241,7 @@ const update = async (req, res, next) => {
 
         return res.status(200).json(formatApiResponse({ id: req.id, result: { reportid } }));
     } catch (error) {
+        debug('update failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -294,6 +299,7 @@ const publish = async (req, res, next) => {
 
         return res.status(200).json(formatApiResponse({ id: req.id, result: { reportid, ...(hash && { hash }) } }));
     } catch (error) {
+        debug('publish failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -341,7 +347,7 @@ const deactivateAllJobsForReport = async jobIds => {
         await Promise.all(_.map(jobIds, id => deactivateJob(id)));
         return true;
     } catch (error) {
-        console.log(JSON.stringify(error));
+        debug('deactivateAllJobsForReport failed', JSON.stringify(error));
         return false;
     }
 }
@@ -413,6 +419,7 @@ const retire = async (req, res, next) => {
         }
         return res.status(200).json(formatApiResponse({ id: req.id, result: { reportid, ...(hash && { hash }) } }));
     } catch (error) {
+        debug('retire failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }
@@ -464,6 +471,7 @@ const readWithDatasets = async (req, res, next) => {
         const datasets = await getDatasets({ document, user, req });
         return res.json(formatApiResponse({ id: req.id, result: { metadata: document, datasets } }));
     } catch (error) {
+        debug('readWithDatasets failed', JSON.stringify(error));
         return next(createError(500, error.message));
     }
 }

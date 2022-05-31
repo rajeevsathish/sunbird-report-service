@@ -1,4 +1,4 @@
-var debug = require('debug')('report-service:server');
+var debug = require('debug')('controllers:summary');
 const createError = require('http-errors');
 
 const { report_summary, report_status } = require('../models');
@@ -38,6 +38,7 @@ const createSummary = async (req, res, next) => {
 
         return res.status(200).json(formatApiResponse({ id: req.id, result: { summaryId: id } }));
     } catch (error) {
+        debug('createSummary failed', JSON.stringify(error));
         return next(createError(500, error));
     }
 }
@@ -64,6 +65,7 @@ const listSummaries = async (req, res, next) => {
         });
         return res.json(formatApiResponse({ id: req.id, result: { summaries: rows, count } }));
     } catch (error) {
+        debug('listSummaries failed', JSON.stringify(error));
         return next(createError(500, error));
     }
 }
@@ -90,6 +92,7 @@ const getLatestSummary = async (req, res, next) => {
         return res.json(formatApiResponse({ id: req.id, result: { summaries: rows, count } }));
 
     } catch (error) {
+        debug('getLatestSummary failed', JSON.stringify(error));
         return next(createError(500, error));
     }
 }
