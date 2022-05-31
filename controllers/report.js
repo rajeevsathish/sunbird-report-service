@@ -461,10 +461,7 @@ const readWithDatasets = async (req, res, next) => {
             }
         }
 
-
-        const dataSources = _.get(document, 'reportconfig.dataSource');
-        const datasets = await getDatasets({ dataSources, user, req });
-
+        const datasets = await getDatasets({ document, user, req });
         return res.json(formatApiResponse({ id: req.id, result: { metadata: document, datasets } }));
     } catch (error) {
         return next(createError(500, error.message));

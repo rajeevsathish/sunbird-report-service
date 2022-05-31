@@ -189,7 +189,8 @@ const getDataset = async ({ dataSource, user, req }) => {
     }
 }
 
-const getDatasets = async ({ dataSources, user, req }) => {
+const getDatasets = async ({ document, user, req }) => {
+    let dataSources = _.get(document, 'reportconfig.dataSource');
     if (!dataSources) return [];
     dataSources = Array.isArray(dataSources) ? dataSources : [dataSources];
     return Promise.all(dataSources.map(dataSource => getDataset({ dataSource, user, req })));

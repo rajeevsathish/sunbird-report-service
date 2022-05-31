@@ -1,4 +1,6 @@
 var ApiInterceptor = require('sb_api_interceptor');
+const _ = require('lodash');
+const jwt = require('jsonwebtoken');
 const { envVariables: { AUTH } } = require('./envHelpers');
 
 const keyCloakConfig = {
@@ -16,7 +18,6 @@ const cacheConfig = {
 
 const apiInterceptor = new ApiInterceptor(keyCloakConfig, cacheConfig, [`${AUTH.PORTAL_AUTH_SERVER_URL}/realms/${AUTH.KEY_CLOAK_REALM}`]);
 
-
 function validateToken(token) {
     return new Promise((resolve, reject) => {
         apiInterceptor.validateToken(token, function (error, tokenData) {
@@ -30,4 +31,19 @@ function validateToken(token) {
     })
 }
 
-module.exports = { validateToken }
+function validateJwtToken(token) {
+    return new Promise((resolve, reject) => {
+
+        const decoded = jwt.decode(token, { complete: true });
+
+        if (!decoded) {
+            resolve({ status: "failed", error: { message: 'invalid jwt' } });
+        }
+
+        resolve({ status: "success", result: decoded })
+    }).catch(error => {
+        return { status: 'failed', error }
+    })
+}
+
+module.exports = { validateToken, validateJwtToken }

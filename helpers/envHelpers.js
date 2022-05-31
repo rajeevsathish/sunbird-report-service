@@ -60,7 +60,8 @@ const envVariables = {
     },
     UPSTREAM: {
         LEARNER: env.sunbird_learner_player_url,
-        CONTENT_PROXY: env.sunbird_content_proxy_url
+        CONTENT_PROXY: env.sunbird_content_proxy_url,
+        DATA_SERVICE: env.sunbird_dataservice_url
     }
 }
 

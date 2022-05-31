@@ -22,16 +22,21 @@ const errorCallback = function (error) {
 const learnerUpstream = axios.create({
     baseURL: UPSTREAM.LEARNER
 });
-
 learnerUpstream.interceptors.request.use(successCallback, errorCallback);
 
 const contentProxyUpstream = axios.create({
     baseURL: UPSTREAM.CONTENT_PROXY
 });
-
 contentProxyUpstream.interceptors.request.use(successCallback, errorCallback);
+
+const dataServiceProxyUpstream = axios.create({
+    baseURL: UPSTREAM.DATA_SERVICE
+});
+dataServiceProxyUpstream.interceptors.request.use(successCallback, errorCallback);
+
 
 module.exports = {
     learnerUpstream,
-    contentProxyUpstream
+    contentProxyUpstream,
+    dataServiceProxyUpstream
 }
