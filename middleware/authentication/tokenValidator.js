@@ -1,5 +1,7 @@
 const createError = require('http-errors');
-const { validateToken } = require('../../helpers/token_validation');
+const _ = require('lodash');
+
+const { validateJwtToken } = require('../../helpers/token_validation');
 
 /**
  * @description [verifyToken - Used to validate the token and add userid into headers
@@ -19,15 +21,16 @@ function verifyToken({ tokenRequired = true }) {
             }
 
 
-            const { status, result, error } = await validateToken(token);
+            const { status, result, error } = await validateJwtToken(token);
 
             if (status === 'failed' && error) {
                 return next(createError(401, error.message));
             }
 
             if (status === 'success' && result) {
-                if ('userId' in result) {
-                    var [, , userId] = result.userId.split(':');
+                const sub = _.get(result, 'payload.sub');
+                if (sub) {
+                    var [, , userId] = sub.split(':');
                     if (userId) {
                         req.headers['x-authenticated-userid'] = userId;
                         req.tokenData = result;

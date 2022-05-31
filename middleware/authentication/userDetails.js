@@ -9,7 +9,7 @@ const fetchUserDetails = () => {
 
         if (token && userId) {
             try {
-                const response = await userRead({ userId, headers: { 'x-authenticated-user-token': token } });
+                const response = await userRead({ userId, headers: { 'x-authenticated-user-token': token, 'x-auth-token': token } });
                 const userDetails = _.get(response, 'data.result.response');
                 req.userDetails = userDetails;
             } catch (error) {
