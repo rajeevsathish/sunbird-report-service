@@ -207,7 +207,7 @@ const read = async (req, res, next) => {
 
         }
 
-        return res.json(formatApiResponse({ id: req.id, result: document }));
+        return res.json(formatApiResponse({ id: req.id, result: { reports: [document], count: 1 } }));
     } catch (error) {
         debug('read failed', JSON.stringify(error));
         return next(createError(500, error.message));
