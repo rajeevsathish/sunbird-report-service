@@ -66,7 +66,7 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
                     headers: {
                         ['X-Channel-Id']: value,
                     },
-                    ..._(from && to && {
+                    ...(from && to && {
                         params: {
                             from, to
                         }
@@ -85,7 +85,7 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
                 headers: {
                     ['X-Channel-Id']: channelID,
                 },
-                ..._(from && to && {
+                ...(from && to && {
                     params: {
                         from, to
                     }
@@ -103,7 +103,10 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
             dataset_id: datasetId,
             parameters,
             isParameterized,
-            data
+            data,
+            ...(from && to && {
+                from, to
+            })
         }];
 
     } catch (error) {
