@@ -75,13 +75,13 @@ const listSummaries = async (req, res, next) => {
  */
 const getLatestSummary = async (req, res, next) => {
     try {
-        const { hash } = req.query;
-        const { reportid, chartid } = req.params;
+        const { hash = null } = req.query;
+        const { reportid, chartid = null } = req.params;
         const { count, rows } = await report_summary.findAndCountAll({
             where: {
                 reportid,
-                ...(chartid && { chartid }),
-                ...(hash && { param_hash: hash })
+                chartid,
+                param_hash: hash
             },
             order: [
                 ['createdon', 'DESC']
