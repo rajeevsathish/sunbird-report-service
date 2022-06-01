@@ -285,8 +285,10 @@ const publish = async (req, res, next) => {
                         status: CONSTANTS.REPORT_STATUS.LIVE
                     },
                     {
-                        reportid,
-                        hashed_val: hash
+                        where: {
+                            reportid,
+                            hashed_val: hash
+                        }
                     }
                 )
             } else {
@@ -406,8 +408,10 @@ const retire = async (req, res, next) => {
                         status: CONSTANTS.REPORT_STATUS.RETIRED
                     },
                     {
-                        reportid,
-                        hashed_val: hash
+                        where: {
+                            reportid,
+                            hashed_val: hash
+                        }
                     }
                 )
             } else {
