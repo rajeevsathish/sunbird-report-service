@@ -9,6 +9,7 @@ const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
 const { validateAccessPath, matchAccessPath } = require("./accessPaths");
 const { getDatasets } = require("./parameters");
+const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
 // checks by reportid if the report exists in our database or not
 const reportExists = async (reportid) => report.findOne({ where: { reportid } });
@@ -468,7 +469,15 @@ const readWithDatasets = async (req, res, next) => {
             }
         }
 
-        const datasets = await getDatasets({ document, user, req });
+        let datasets;
+        if (_.toLower(document.report_type) === 'report') {
+            datasets = await getDatasets({ document, user, req });
+        }
+
+        if (_.toLower(document.report_type) === 'dataset') {
+            datasets = await fetchAndFormatExhaustDataset({ req, document, user })
+        }
+
         return res.json(formatApiResponse({ id: req.id, result: { metadata: document, datasets } }));
     } catch (error) {
         debug('readWithDatasets failed', JSON.stringify(error));
