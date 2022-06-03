@@ -19,7 +19,7 @@ module.exports = {
             if (!_.get(boardCategory, 'terms') && !Array.isArray(boardCategory.terms)) { return of([]); }
             return _.map(boardCategory.terms, 'name');
         } catch (error) {
-            debug(` ${this.name} masterData fetch failed`, JSON.stringify(error));
+            debug(`$board masterData fetch failed`, JSON.stringify(error));
             return [];
         }
     }

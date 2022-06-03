@@ -22,7 +22,7 @@ module.exports = {
             const result = response.data;
             return _.map(_.get(result, 'result.response.content') || [], 'slug');
         } catch (error) {
-            debug(` ${this.name} masterData fetch failed`, JSON.stringify(error));
+            debug(`$slug masterData fetch failed`, JSON.stringify(error));
             return [];
         }
     }

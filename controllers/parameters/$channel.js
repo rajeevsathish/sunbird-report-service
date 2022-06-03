@@ -23,7 +23,7 @@ module.exports = {
             const result = response.data;
             return _.map(_.get(result, 'result.response.content') || [], 'id');
         } catch (error) {
-            debug(` ${this.name} masterData fetch failed`, JSON.stringify(error));
+            debug(`$channel masterData fetch failed`, JSON.stringify(error));
             return [];
         }
     }

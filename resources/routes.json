@@ -89,7 +89,7 @@
     },
     "ORG": {
         "SEARCH": {
-            "URL": "/org/v1/ext/search"
+            "URL": "/api/org/v1/ext/search"
         }
     },
     "LOCATION": {
