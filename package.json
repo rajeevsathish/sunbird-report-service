@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.27.2",
+    "axios-debug-log": "^0.8.4",
     "azure-storage": "^2.10.7",
     "cookie-parser": "~1.4.4",
     "cross-env": "^7.0.3",

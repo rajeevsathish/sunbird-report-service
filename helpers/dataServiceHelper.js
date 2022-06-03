@@ -53,7 +53,7 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
             //get the master data from memory cache is available else call the master data fetch API for the parameter.
             const cachedData = memoryCache.get(parameter);
 
-            if (cachedData && cache) {
+            if (false && cachedData && cache) {
                 masterDataForParameter = cachedData;
             } else {
                 masterDataForParameter = await masterData({ user, req });

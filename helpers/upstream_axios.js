@@ -1,4 +1,6 @@
 const axios = require('axios');
+require('axios-debug-log/enable');
+
 const { envVariables: { UPSTREAM, PORTAL_API_AUTH_TOKEN } } = require('./envHelpers')
 
 const commonHeaders = {
