@@ -1,4 +1,4 @@
-const { contentProxyUpstream } = require('./upstream_axios')
+const { contentProxyUpstream, learnerUpstream } = require('./upstream_axios')
 const ROUTES = require('../resources/routes.json');
 
 const orgSearch = ({ headers = {}, body = {} }) => {
@@ -9,7 +9,7 @@ const orgSearch = ({ headers = {}, body = {} }) => {
         data: body
     };
 
-    return contentProxyUpstream(config);
+    return learnerUpstream(config);
 }
 
 module.exports = {
