@@ -16,8 +16,9 @@ const fetchUserDetails = () => {
                 debug('User Read Api Success', JSON.stringify(userDetails));
                 req.userDetails = userDetails;
             } catch (error) {
+                const statusCode = _.get(error, 'response.status');
                 debug('User Read Api failed', JSON.stringify(error));
-                return next(createErrors(500, _.get(error, 'message')));
+                return next(createErrors(statusCode || 500, _.get(error, 'message')));
             }
         }
 
