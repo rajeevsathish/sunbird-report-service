@@ -2,6 +2,7 @@ const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 var memoryCache = require('memory-cache');
+var debug = require('debug')('parameters:index');
 
 const { getSharedAccessSignature } = require('../../helpers/azure-storage');
 const { envVariables } = require('../../helpers/envHelpers');
@@ -164,10 +165,12 @@ const getDataset = async ({ dataSource, user, req }) => {
 
             //get the master data from memory cache is available else call the master data fetch API for the parameter.
             const cachedData = memoryCache.get(parameter);
-            if (cachedData && cache) {
+            debug(parameter, 'Cached Data', JSON.stringify(cachedData));
+            if (false && cachedData && cache) {
                 masterDataForParameter = cachedData;
             } else {
                 masterDataForParameter = await masterData({ user, req });
+                debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
                 memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
             }
 
