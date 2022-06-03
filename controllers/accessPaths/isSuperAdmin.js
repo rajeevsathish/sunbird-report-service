@@ -19,7 +19,7 @@ module.exports = {
         // check if the user is superadmin or not
         let isSuperAdmin = false;
         if (_.find(userRolesSet, role => _.toLower(role) === 'report_admin')) {
-            const userSlug = _.get(user, 'slug');
+            const userSlug = _.get(user, 'rootOrg.slug');
             if (userSlug === envVariables.SUNBIRD_SUPER_ADMIN_SLUG) {
                 isSuperAdmin = true
             }
