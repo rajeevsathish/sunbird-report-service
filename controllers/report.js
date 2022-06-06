@@ -7,7 +7,7 @@ const axios = require('axios');
 const { report, report_status, report_summary } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
-const { validateAccessPath, matchAccessPath, accessPathForPrivateReports } = require("./accessPaths");
+const { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport } = require("./accessPaths");
 const { getDatasets } = require("./parameters");
 const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
@@ -87,6 +87,11 @@ const create = async (req, res, next) => {
     try {
         const { report: reportMeta } = req.body.request;
         const user = req.userDetails;
+
+        const userId = _.get(user, 'identifier') || _.get(user, 'id');
+        if (userId) {
+            reportMeta.createdby = userId;
+        }
 
         // if report is private then it should be accessible only by the creator of the report.
         if (user && _.get(reportMeta, 'type') === CONSTANTS.REPORT_TYPE.PRIVATE) {
@@ -199,8 +204,9 @@ const read = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
-        if ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE)) {
-            const userDetails = req.userDetails;
+        const userDetails = req.userDetails;
+        const isCreator = isCreatorOfReport({ user: userDetails, report: document });
+        if (!isCreator && ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE))) {
 
             if (!userDetails) {
                 return next(createError(401, 'unauthorized access'));

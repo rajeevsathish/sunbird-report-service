@@ -26,12 +26,19 @@ const rules = new Map();
         })
 })(__dirname);
 
+//check if the user is the creator of the report or not.
+const isCreatorOfReport = ({ user, report }) => _.get(report, 'createdby') === (_.get(user, 'identifier') || _.get(user, 'id'));
+
 /**
  * @description Validates a user context against the accesspath rules set for the report
  * @param {*} user
  */
 const validateAccessPath = user => report => {
     let { accesspath, type } = report;
+
+    //creator of the report should have access in all the scenarios.
+    const isCreator = isCreatorOfReport({ user, report });
+    if (isCreator) return true;
 
     if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
 
@@ -87,5 +94,5 @@ const accessPathForPrivateReports = ({ user }) => {
     return null;
 };
 
-module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports }
+module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport }
 
