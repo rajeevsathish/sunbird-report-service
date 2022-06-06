@@ -135,11 +135,16 @@ const getParameterFromPath = path => {
 const generateSasPredicate = ({ parameter, path, dataset }) => value => {
     const resolvedPath = path.replace(parameter, value);
     const promise = getSharedAccessSignature({ filePath: resolvedPath })
-        .then(sasUrl => ({ key: value, sasUrl }))
-        .catch(_ => ({ key: value, sasUrl: null }))
+        .then(({ sasUrl, expiresAt }) => ({ key: value, sasUrl, expiresAt }))
+        .catch(_ => ({ key: value, sasUrl: null, expiresAt: null }))
         .then(data => {
-            const { key, sasUrl } = data;
-            dataset.data[key] = { signedUrl: sasUrl };
+            const { key, sasUrl, expiresAt } = data;
+            dataset.data.push({
+                id: key,
+                type: parameter,
+                url: sasUrl,
+                expiresAt
+            });
         });
     return promise;
 }
@@ -147,7 +152,7 @@ const generateSasPredicate = ({ parameter, path, dataset }) => value => {
 const getDataset = async ({ dataSource, user, req }) => {
     let { id, path } = dataSource;
     try {
-        const dataset = { dataset_id: id, isParameterized: false, parameters: null, data: {} };
+        const dataset = { dataset_id: id, isParameterized: false, parameters: null, data: [] };
         // for backward compatibility
         if (typeof path === 'string' && path.startsWith('/reports/fetch/')) {
             path = path.replace('/reports/fetch/', '');
@@ -177,18 +182,19 @@ const getDataset = async ({ dataSource, user, req }) => {
             await Promise.all(masterDataForParameter.map(generateSasPredicate({ parameter, path, dataset })))
 
         } else {
-            const sasUrl = await getSharedAccessSignature({ filePath: path }).catch(error => null);
-            dataset.data = {
-                default: {
-                    signedUrl: sasUrl
-                }
-            };
+            const { sasUrl, expiresAt } = await getSharedAccessSignature({ filePath: path }).catch(error => null);
+            dataset.data = [{
+                id: 'default',
+                type: null,
+                url: sasUrl,
+                expiresAt
+            }];
         }
 
         return dataset;
 
     } catch (error) {
-        return { dataset_id: id, data: null, parameters: null, isParameterized: false }
+        return { dataset_id: id, data: [], parameters: null, isParameterized: false }
     }
 }
 
