@@ -7,7 +7,7 @@ const axios = require('axios');
 const { report, report_status, report_summary } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
-const { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport } = require("./accessPaths");
+const { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport, roleBasedAccess } = require("./accessPaths");
 const { getDatasets } = require("./parameters");
 const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
@@ -48,6 +48,7 @@ const search = async (req, res, next) => {
         if (!userDetails) {
             //token absent => check only public reports
             filteredReports = _.filter(rows, row => {
+                if (!roleBasedAccess({ report: row, user: userDetails })) return false;
                 if (accessPathMatchClosure) {
                     const isMatched = accessPathMatchClosure(row);
                     if (!isMatched) return false;
@@ -57,6 +58,7 @@ const search = async (req, res, next) => {
         } else {
             //token present => check for both public, protected and private reports
             filteredReports = _.filter(rows, row => {
+                if (!roleBasedAccess({ report: row, user: userDetails })) return false;
                 const { type } = row;
                 if (!type) return false;
                 if (accessPathMatchClosure) {
@@ -206,18 +208,23 @@ const read = async (req, res, next) => {
 
         const userDetails = req.userDetails;
         const isCreator = isCreatorOfReport({ user: userDetails, report: document });
-        if (!isCreator && ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE))) {
 
-            if (!userDetails) {
-                return next(createError(401, 'unauthorized access'));
+        if (!isCreator) {
+            const isAllowed = roleBasedAccess({ report: document, user: userDetails });
+            if (!isAllowed) {
+                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
 
-            const isAuthorized = validateAccessPath(userDetails)(document);
+            if ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE)) {
+                if (!userDetails) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
 
-            if (!isAuthorized) {
-                return next(createError(401, 'unauthorized access'));
+                const isAuthorized = validateAccessPath(userDetails)(document);
+                if (!isAuthorized) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
             }
-
         }
 
         return res.json(formatApiResponse({ id: req.id, result: { reports: [document], count: 1 } }));
@@ -473,16 +480,23 @@ const readWithDatasets = async (req, res, next) => {
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
         const user = req.userDetails;
-        if ((document.type === CONSTANTS.REPORT_TYPE.PRIVATE) || (document.type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
+        const isCreator = isCreatorOfReport({ user, report: document });
 
-            if (!user) {
-                return next(createError(401, 'unauthorized access'));
+        if (!isCreator) {
+            const isAllowed = roleBasedAccess({ report: document, user });
+            if (!isAllowed) {
+                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
 
-            const isAuthorized = validateAccessPath(user)(document);
+            if ((document.type === CONSTANTS.REPORT_TYPE.PRIVATE) || (document.type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
+                if (!user) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
 
-            if (!isAuthorized) {
-                return next(createError(401, 'unauthorized access'));
+                const isAuthorized = validateAccessPath(user)(document);
+                if (!isAuthorized) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
             }
         }
 

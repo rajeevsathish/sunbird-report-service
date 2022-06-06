@@ -22,8 +22,9 @@ const userRead = ({ userId, headers = {} }) => {
  * @return {*} 
  */
 const isUserAdmin = (user) => {
-    const userRoles = _.uniq(_.flatMap(_.map(user.organisations, org => org.roles)));
-    return _.includes(userRoles, 'REPORT_ADMIN')
+    const userRoles = _.get(user, 'roles') || [];
+    const userRolesSet = _.map(userRoles, 'role');
+    return _.includes(userRolesSet, 'REPORT_ADMIN')
 };
 
 

@@ -11,10 +11,11 @@
         "SUCCESS": "success"
     },
     "MESSAGES": {
-        "NO_REPORT": "report not found",
+        "NO_REPORT": "Report not found",
         "NO_COLUMNS_TO_UPDATE": "0 columns to update",
-        "NO_API": "no api exists with these value",
-        "RETIRE_FAILURE": "Failed to retire report"
+        "NO_API": "No api exists with these value",
+        "RETIRE_FAILURE": "Failed to retire report",
+        "FORBIDDEN": "Unauthorized Access"
     },
     "REPORT_STATUS": {
         "LIVE": "live",

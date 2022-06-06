@@ -3,6 +3,7 @@ const path = require('path');
 const _ = require('lodash');
 
 const CONSTANTS = require('../../resources/constants.json');
+const { isUserAdmin } = require('../../helpers/userHelper');
 
 const basename = path.basename(__filename);
 
@@ -87,6 +88,11 @@ const matchAccessPath = accessPathSearchPayload => {
     }
 }
 
+/**
+ * @description private reports should should have accesspath set as userId of the creator
+ * @param {*} { user }
+ * @return {*} 
+ */
 const accessPathForPrivateReports = ({ user }) => {
     if (user) {
         return { userId: _.get(user, 'identifier') || _.get(user, 'id') }
@@ -94,5 +100,21 @@ const accessPathForPrivateReports = ({ user }) => {
     return null;
 };
 
-module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport }
+/**
+ *  @description Only report_admin can access live, retired and draft version of the report while others can access only live reports.
+ * @param {*} { document, user }
+ * @return {*} 
+ */
+const roleBasedAccess = ({ report, user }) => {
+    const { status } = report;
+    if ([CONSTANTS.REPORT_STATUS.DRAFT, CONSTANTS.REPORT_STATUS.RETIRED].includes(status)) {
+        if (!isUserAdmin(user)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport, roleBasedAccess }
 
