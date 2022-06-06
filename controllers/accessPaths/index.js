@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
+
+const CONSTANTS = require('../../resources/constants.json');
+
 const basename = path.basename(__filename);
 
 /* 
@@ -28,12 +31,18 @@ const rules = new Map();
  * @param {*} user
  */
 const validateAccessPath = user => report => {
-    const { accesspath, type } = report;
+    let { accesspath, type } = report;
 
-    if (type === 'public') return true;
-    if (type === 'private') {
+    if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
+
+    if (type === CONSTANTS.REPORT_TYPE.PROTECTED) {
         if (!accesspath) return false;
         if (typeof accesspath !== 'object') return false;
+    }
+
+    if (type === CONSTANTS.REPORT_TYPE.PRIVATE && !accesspath) {
+        // if report is private then it should be accessible only by the creator of the report.
+        accesspath = accessPathForPrivateReports({ user });
     }
 
     for (let [key, value] of Object.entries(accesspath)) {
@@ -71,5 +80,12 @@ const matchAccessPath = accessPathSearchPayload => {
     }
 }
 
-module.exports = { validateAccessPath, matchAccessPath }
+const accessPathForPrivateReports = ({ user }) => {
+    if (user) {
+        return { userId: _.get(user, 'identifier') || _.get(user, 'id') }
+    }
+    return null;
+};
+
+module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports }
 

@@ -7,7 +7,7 @@ const axios = require('axios');
 const { report, report_status, report_summary } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
-const { validateAccessPath, matchAccessPath } = require("./accessPaths");
+const { validateAccessPath, matchAccessPath, accessPathForPrivateReports } = require("./accessPaths");
 const { getDatasets } = require("./parameters");
 const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
@@ -55,7 +55,7 @@ const search = async (req, res, next) => {
                 return row.type === CONSTANTS.REPORT_TYPE.PUBLIC;
             });
         } else {
-            //token present => check for both public and private reports
+            //token present => check for both public, protected and private reports
             filteredReports = _.filter(rows, row => {
                 const { type } = row;
                 if (!type) return false;
@@ -64,7 +64,7 @@ const search = async (req, res, next) => {
                     if (!isMatched) return false;
                 }
                 if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
-                if (type === CONSTANTS.REPORT_TYPE.PRIVATE) {
+                if ((type === CONSTANTS.REPORT_TYPE.PRIVATE) || (type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
                     return validateAccessPath(userDetails)(row);
                 }
             })
@@ -86,6 +86,13 @@ const search = async (req, res, next) => {
 const create = async (req, res, next) => {
     try {
         const { report: reportMeta } = req.body.request;
+        const user = req.userDetails;
+
+        // if report is private then it should be accessible only by the creator of the report.
+        if (user && _.get(reportMeta, 'type') === CONSTANTS.REPORT_TYPE.PRIVATE) {
+            reportMeta.accesspath = accessPathForPrivateReports({ user });
+        }
+
         const { reportid, reportaccessurl } = await report.create(reportMeta);
 
         return res.status(201).json(formatApiResponse({
@@ -192,7 +199,7 @@ const read = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
-        if (document.type === 'private') {
+        if ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE)) {
             const userDetails = req.userDetails;
 
             if (!userDetails) {
@@ -460,7 +467,7 @@ const readWithDatasets = async (req, res, next) => {
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
         const user = req.userDetails;
-        if (document.type === 'private') {
+        if ((document.type === CONSTANTS.REPORT_TYPE.PRIVATE) || (document.type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
 
             if (!user) {
                 return next(createError(401, 'unauthorized access'));

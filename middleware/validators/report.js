@@ -17,10 +17,10 @@ module.exports = {
                 createdon: Joi.string().optional(),
                 updatedon: Joi.string().optional(),
                 createdby: Joi.string().required(),
-                type: Joi.string().valid("private", "public").required(),
+                type: Joi.string().valid(...reportTypesEnum).required(),
                 report_type: Joi.string().valid("report", "dataset").optional(),
                 status: Joi.string()
-                    .valid("draft")
+                    .valid(CONSTANTS.REPORT_STATUS.DRAFT)
                     .trim()
                     .optional(),
                 slug: Joi.string().trim().required(),
@@ -33,7 +33,7 @@ module.exports = {
                     enddate: Joi.string().required(),
                 }).required(),
                 parameters: Joi.array().items(Joi.string()).optional(),
-                accesspath: Joi.alternatives().conditional('type', { is: 'private', then: Joi.object().required(), otherwise: Joi.object().optional() }),
+                accesspath: Joi.alternatives().conditional('type', { is: CONSTANTS.REPORT_TYPE.PROTECTED, then: Joi.object().required(), otherwise: Joi.object().optional() }),
                 visibilityflags: Joi.object().optional().default({})
             }).required(),
         }).required(),
