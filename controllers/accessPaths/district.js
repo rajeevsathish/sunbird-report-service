@@ -9,7 +9,7 @@ module.exports = {
     ruleName: 'district',
     isMatch(user, payload) {
         payload = Array.isArray(payload) ? payload : [payload];
-        const userProfileLocation = _.get(user, 'profileLocation');
+        const userProfileLocation = _.get(user, 'profileLocation') || _.get(user, 'userLocations');
         if (!userProfileLocation) return false;
         if (!Array.isArray(userProfileLocation)) return false;
         const userDistrict = _.find(userProfileLocation, location => _.get(location, 'type') === 'district');

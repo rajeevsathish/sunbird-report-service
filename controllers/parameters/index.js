@@ -6,6 +6,7 @@ var debug = require('debug')('parameters:index');
 
 const { getSharedAccessSignature } = require('../../helpers/azure-storage');
 const { envVariables } = require('../../helpers/envHelpers');
+const { isUserSuperAdmin } = require('../../helpers/userHelper');
 
 /*
 
@@ -165,21 +166,31 @@ const getDataset = async ({ dataSource, user, req }) => {
             dataset.isParameterized = true;
             dataset.parameters = [parameter];
 
-            const { masterData, cache = false } = parameters[parameter];
+            const { masterData, cache = false, value } = parameters[parameter];
+            const resolvedValue = value(user);
+            debug(parameter, 'Resolved Value', JSON.stringify(resolvedValue));
             let masterDataForParameter;
 
-            //get the master data from memory cache is available else call the master data fetch API for the parameter.
-            const cachedData = memoryCache.get(parameter);
-            debug(parameter, 'Cached Data', JSON.stringify(cachedData));
-            if (false && cachedData && cache) {
-                masterDataForParameter = cachedData;
+            if (isUserSuperAdmin(user)) {
+                //if the user is super REPORT_ADMIN then return all the masterData;
+                //get the master data from memory cache is available else call the master data fetch API for the parameter.
+                const cachedData = memoryCache.get(parameter);
+                debug(parameter, 'Cached Data', JSON.stringify(cachedData));
+                if (false && cachedData && cache) {
+                    masterDataForParameter = cachedData;
+                } else {
+                    masterDataForParameter = await masterData({ user, req });
+                    debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
+                    memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                }
             } else {
-                masterDataForParameter = await masterData({ user, req });
-                debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
-                memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                //if the user is not super REPORT_ADMIN then return only the resolved parameter data;
+                masterDataForParameter = resolvedValue && (Array.isArray(resolvedValue) ? resolvedValue : [resolvedValue]);
             }
 
-            await Promise.all(masterDataForParameter.map(generateSasPredicate({ parameter, path, dataset })))
+            if (Array.isArray(masterDataForParameter) && masterDataForParameter.length) {
+                await Promise.all(masterDataForParameter.map(generateSasPredicate({ parameter, path, dataset })))
+            }
 
         } else {
             const { sasUrl, expiresAt } = await getSharedAccessSignature({ filePath: path }).catch(error => null);

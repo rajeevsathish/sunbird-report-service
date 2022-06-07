@@ -47,17 +47,25 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
 
         const isParameterized = parameter && (parameter in reportParameters);
         if (isParameterized) {
-            const { masterData, cache = false } = reportParameters[parameter];
+            const { masterData, cache = false, value } = reportParameters[parameter];
+            const resolvedValue = value(user);
+            debug(parameter, 'Resolved Value', JSON.stringify(resolvedValue));
             let masterDataForParameter;
 
-            //get the master data from memory cache is available else call the master data fetch API for the parameter.
-            const cachedData = memoryCache.get(parameter);
-
-            if (false && cachedData && cache) {
-                masterDataForParameter = cachedData;
+            if (isUserSuperAdmin(user)) {
+                //if the user is super REPORT_ADMIN then return all the masterData;
+                //get the master data from memory cache is available else call the master data fetch API for the parameter.
+                const cachedData = memoryCache.get(parameter);
+                if (false && cachedData && cache) {
+                    masterDataForParameter = cachedData;
+                } else {
+                    masterDataForParameter = await masterData({ user, req });
+                    debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
+                    memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                }
             } else {
-                masterDataForParameter = await masterData({ user, req });
-                memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                //if the user is not super REPORT_ADMIN then return only the resolved parameter data;
+                masterDataForParameter = resolvedValue && (Array.isArray(resolvedValue) ? resolvedValue : [resolvedValue]);
             }
 
             await Promise.all(masterDataForParameter.map(value => {
@@ -72,14 +80,15 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
                         }
                     })
                 }
-                return getPeriodicFiles(input).then(response => {
-                    data.push({
-                        id: value,
-                        type: parameter,
-                        ...response
+                return getPeriodicFiles(input)
+                    .then(response => {
+                        data.push({
+                            id: value,
+                            type: parameter,
+                            ...response
+                        })
+                        return response
                     })
-                    return response
-                })
             }));
 
         } else {
