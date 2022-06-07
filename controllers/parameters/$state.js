@@ -5,7 +5,7 @@ const { locationSearch } = require("../../helpers/learnerHelper");
 
 module.exports = {
     name: '$state',
-    value: (userData) => _.get(_.find(_.get(userData, 'userProfile.userLocations'), ['type', 'state']), 'name'),
+    value: (user) => _.get(_.find(_.get(user, 'userLocations') || _.get(user, 'profileLocation'), ['type', 'state']), 'name'),
     cache: true,
     async masterData({ user, req }) {
         try {

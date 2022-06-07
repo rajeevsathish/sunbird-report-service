@@ -6,7 +6,7 @@ const { orgSearch } = require("../../helpers/orgHelper");
 
 module.exports = {
     name: '$channel',
-    value: (userData) => _.get(userData, 'userProfile.rootOrg.hashTagId'),
+    value: (user) => _.get(user, 'rootOrg.hashTagId') || _.get(user, 'rootOrg.channel') || _.get(user, 'channel'),
     cache: true,
     async masterData({ user, req }) {
         try {

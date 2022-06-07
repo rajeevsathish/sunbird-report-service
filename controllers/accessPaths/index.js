@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
+
+const CONSTANTS = require('../../resources/constants.json');
+const { isUserAdmin } = require('../../helpers/userHelper');
+
 const basename = path.basename(__filename);
 
 /* 
@@ -23,17 +27,30 @@ const rules = new Map();
         })
 })(__dirname);
 
+//check if the user is the creator of the report or not.
+const isCreatorOfReport = ({ user, report }) => _.get(report, 'createdby') === (_.get(user, 'identifier') || _.get(user, 'id'));
+
 /**
  * @description Validates a user context against the accesspath rules set for the report
  * @param {*} user
  */
 const validateAccessPath = user => report => {
-    const { accesspath, type } = report;
+    let { accesspath, type } = report;
 
-    if (type === 'public') return true;
-    if (type === 'private') {
+    //creator of the report should have access in all the scenarios.
+    const isCreator = isCreatorOfReport({ user, report });
+    if (isCreator) return true;
+
+    if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
+
+    if (type === CONSTANTS.REPORT_TYPE.PROTECTED) {
         if (!accesspath) return false;
         if (typeof accesspath !== 'object') return false;
+    }
+
+    if (type === CONSTANTS.REPORT_TYPE.PRIVATE && !accesspath) {
+        // if report is private then it should be accessible only by the creator of the report.
+        accesspath = accessPathForPrivateReports({ user });
     }
 
     for (let [key, value] of Object.entries(accesspath)) {
@@ -71,5 +88,33 @@ const matchAccessPath = accessPathSearchPayload => {
     }
 }
 
-module.exports = { validateAccessPath, matchAccessPath }
+/**
+ * @description private reports should should have accesspath set as userId of the creator
+ * @param {*} { user }
+ * @return {*} 
+ */
+const accessPathForPrivateReports = ({ user }) => {
+    if (user) {
+        return { userId: _.get(user, 'identifier') || _.get(user, 'id') }
+    }
+    return null;
+};
+
+/**
+ *  @description Only report_admin can access live, retired and draft version of the report while others can access only live reports.
+ * @param {*} { document, user }
+ * @return {*} 
+ */
+const roleBasedAccess = ({ report, user }) => {
+    const { status } = report;
+    if ([CONSTANTS.REPORT_STATUS.DRAFT, CONSTANTS.REPORT_STATUS.RETIRED].includes(status)) {
+        if (!isUserAdmin(user)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+module.exports = { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport, roleBasedAccess }
 

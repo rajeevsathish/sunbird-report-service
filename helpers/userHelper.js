@@ -1,5 +1,7 @@
-const { learnerUpstream } = require("./upstream_axios");
 const _ = require('lodash');
+
+const { learnerUpstream } = require("./upstream_axios");
+const { envVariables } = require('./envHelpers')
 
 /**
  * @description fetch user details by it's id
@@ -22,8 +24,9 @@ const userRead = ({ userId, headers = {} }) => {
  * @return {*} 
  */
 const isUserAdmin = (user) => {
-    const userRoles = _.uniq(_.flatMap(_.map(user.organisations, org => org.roles)));
-    return _.includes(userRoles, 'REPORT_ADMIN')
+    const userRoles = _.get(user, 'roles') || [];
+    const userRolesSet = _.map(userRoles, 'role');
+    return _.includes(userRolesSet, 'REPORT_ADMIN')
 };
 
 
@@ -35,7 +38,7 @@ const isUserAdmin = (user) => {
 const isUserSuperAdmin = (user) => {
     const isAdmin = isUserAdmin(user);
     if (!isAdmin) return false;
-    return _.get(user, 'rootOrg.slug') === envHelper.sunbird_super_admin_slug;
+    return _.get(user, 'rootOrg.slug') === envVariables.SUNBIRD_SUPER_ADMIN_SLUG;
 }
 
 module.exports = { userRead, isUserAdmin, isUserSuperAdmin };

@@ -27,10 +27,10 @@ const getPeriodicFiles = async ({ datasetId, headers, params }) => {
             params
         });
 
-        return _.get(fetchDatasetResponse, 'data.result.periodWiseFiles') || {};
+        return _.get(fetchDatasetResponse, 'data.result') || {};
     } catch (error) {
         debug('getPeriodicFiles failed', datasetId, params, headers, JSON.stringify(error));
-        return {};
+        return { periodWiseFiles: {}, files: [], expiresAt: 0 };
     }
 }
 
@@ -40,24 +40,32 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
         const { from, to } = req.query;
         const parameters = _.get(document, 'parameters') || null;
 
-        let parameter = null, data = {};
+        let parameter = null, data = [];
         if (parameters && Array.isArray(parameters)) {
             [parameter] = parameters;
         }
 
         const isParameterized = parameter && (parameter in reportParameters);
         if (isParameterized) {
-            const { masterData, cache = false } = reportParameters[parameter];
+            const { masterData, cache = false, value } = reportParameters[parameter];
+            const resolvedValue = value(user);
+            debug(parameter, 'Resolved Value', JSON.stringify(resolvedValue));
             let masterDataForParameter;
 
-            //get the master data from memory cache is available else call the master data fetch API for the parameter.
-            const cachedData = memoryCache.get(parameter);
-
-            if (false && cachedData && cache) {
-                masterDataForParameter = cachedData;
+            if (isUserSuperAdmin(user)) {
+                //if the user is super REPORT_ADMIN then return all the masterData;
+                //get the master data from memory cache is available else call the master data fetch API for the parameter.
+                const cachedData = memoryCache.get(parameter);
+                if (false && cachedData && cache) {
+                    masterDataForParameter = cachedData;
+                } else {
+                    masterDataForParameter = await masterData({ user, req });
+                    debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
+                    memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                }
             } else {
-                masterDataForParameter = await masterData({ user, req });
-                memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                //if the user is not super REPORT_ADMIN then return only the resolved parameter data;
+                masterDataForParameter = resolvedValue && (Array.isArray(resolvedValue) ? resolvedValue : [resolvedValue]);
             }
 
             await Promise.all(masterDataForParameter.map(value => {
@@ -72,10 +80,15 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
                         }
                     })
                 }
-                return getPeriodicFiles(input).then(periodWiseFiles => {
-                    data[value] = { periodWiseFiles }
-                    return periodWiseFiles
-                })
+                return getPeriodicFiles(input)
+                    .then(response => {
+                        data.push({
+                            id: value,
+                            type: parameter,
+                            ...response
+                        })
+                        return response
+                    })
             }));
 
         } else {
@@ -91,12 +104,12 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
                     }
                 })
             };
-            const periodWiseFiles = await getPeriodicFiles(input);
-            data = {
-                default: {
-                    periodWiseFiles
-                }
-            }
+            const response = await getPeriodicFiles(input);
+            data.push({
+                id: 'default',
+                type: null,
+                ...response
+            })
         }
 
         return [{
@@ -111,7 +124,7 @@ const fetchAndFormatExhaustDataset = async ({ req, document, user }) => {
 
     } catch (error) {
         debug('fetchAndFormatExhaustDataset failed', datasetId, JSON.stringify(error));
-        return [{ dataset_id: datasetId, data: null, parameters: null, isParameterized: false }]
+        return [{ dataset_id: datasetId, data: [], parameters: null, isParameterized: false }]
     }
 }
 

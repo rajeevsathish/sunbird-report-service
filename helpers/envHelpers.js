@@ -44,7 +44,7 @@ const envVariables = {
         container_name: env.sunbird_azure_report_container_name,
         account_name: env.sunbird_azure_account_name,
         account_key: env.sunbird_azure_account_key,
-        sasExpiryTime: env.sunbird_report_sas_expiry_in_minutes || 3600 // in minutes
+        sasExpiryTime: env.sunbird_report_sas_expiry_in_minutes || 60 // in minutes
     },
     UPSTREAM: {
         LEARNER: env.sunbird_learner_player_url,

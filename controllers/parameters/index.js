@@ -6,6 +6,7 @@ var debug = require('debug')('parameters:index');
 
 const { getSharedAccessSignature } = require('../../helpers/azure-storage');
 const { envVariables } = require('../../helpers/envHelpers');
+const { isUserSuperAdmin } = require('../../helpers/userHelper');
 
 /*
 
@@ -135,11 +136,16 @@ const getParameterFromPath = path => {
 const generateSasPredicate = ({ parameter, path, dataset }) => value => {
     const resolvedPath = path.replace(parameter, value);
     const promise = getSharedAccessSignature({ filePath: resolvedPath })
-        .then(sasUrl => ({ key: value, sasUrl }))
-        .catch(_ => ({ key: value, sasUrl: null }))
+        .then(({ sasUrl, expiresAt }) => ({ key: value, sasUrl, expiresAt }))
+        .catch(_ => ({ key: value, sasUrl: null, expiresAt: null }))
         .then(data => {
-            const { key, sasUrl } = data;
-            dataset.data[key] = { signedUrl: sasUrl };
+            const { key, sasUrl, expiresAt } = data;
+            dataset.data.push({
+                id: key,
+                type: parameter,
+                url: sasUrl,
+                expiresAt
+            });
         });
     return promise;
 }
@@ -147,7 +153,7 @@ const generateSasPredicate = ({ parameter, path, dataset }) => value => {
 const getDataset = async ({ dataSource, user, req }) => {
     let { id, path } = dataSource;
     try {
-        const dataset = { dataset_id: id, isParameterized: false, parameters: null, data: {} };
+        const dataset = { dataset_id: id, isParameterized: false, parameters: null, data: [] };
         // for backward compatibility
         if (typeof path === 'string' && path.startsWith('/reports/fetch/')) {
             path = path.replace('/reports/fetch/', '');
@@ -160,35 +166,46 @@ const getDataset = async ({ dataSource, user, req }) => {
             dataset.isParameterized = true;
             dataset.parameters = [parameter];
 
-            const { masterData, cache = false } = parameters[parameter];
+            const { masterData, cache = false, value } = parameters[parameter];
+            const resolvedValue = value(user);
+            debug(parameter, 'Resolved Value', JSON.stringify(resolvedValue));
             let masterDataForParameter;
 
-            //get the master data from memory cache is available else call the master data fetch API for the parameter.
-            const cachedData = memoryCache.get(parameter);
-            debug(parameter, 'Cached Data', JSON.stringify(cachedData));
-            if (false && cachedData && cache) {
-                masterDataForParameter = cachedData;
+            if (isUserSuperAdmin(user)) {
+                //if the user is super REPORT_ADMIN then return all the masterData;
+                //get the master data from memory cache is available else call the master data fetch API for the parameter.
+                const cachedData = memoryCache.get(parameter);
+                debug(parameter, 'Cached Data', JSON.stringify(cachedData));
+                if (false && cachedData && cache) {
+                    masterDataForParameter = cachedData;
+                } else {
+                    masterDataForParameter = await masterData({ user, req });
+                    debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
+                    memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                }
             } else {
-                masterDataForParameter = await masterData({ user, req });
-                debug(parameter, 'Master Data', JSON.stringify(masterDataForParameter));
-                memoryCache.put(parameter, masterDataForParameter, envVariables.MEMORY_CACHE_TIMEOUT);
+                //if the user is not super REPORT_ADMIN then return only the resolved parameter data;
+                masterDataForParameter = resolvedValue && (Array.isArray(resolvedValue) ? resolvedValue : [resolvedValue]);
             }
 
-            await Promise.all(masterDataForParameter.map(generateSasPredicate({ parameter, path, dataset })))
+            if (Array.isArray(masterDataForParameter) && masterDataForParameter.length) {
+                await Promise.all(masterDataForParameter.map(generateSasPredicate({ parameter, path, dataset })))
+            }
 
         } else {
-            const sasUrl = await getSharedAccessSignature({ filePath: path }).catch(error => null);
-            dataset.data = {
-                default: {
-                    signedUrl: sasUrl
-                }
-            };
+            const { sasUrl, expiresAt } = await getSharedAccessSignature({ filePath: path }).catch(error => null);
+            dataset.data = [{
+                id: 'default',
+                type: null,
+                url: sasUrl,
+                expiresAt
+            }];
         }
 
         return dataset;
 
     } catch (error) {
-        return { dataset_id: id, data: null, parameters: null, isParameterized: false }
+        return { dataset_id: id, data: [], parameters: null, isParameterized: false }
     }
 }
 

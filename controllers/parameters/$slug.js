@@ -5,7 +5,7 @@ const { orgSearch } = require("../../helpers/orgHelper");
 
 module.exports = {
     name: '$slug',
-    value: (userData) => _.get(userData, 'userProfile.rootOrg.slug'),
+    value: (user) => _.get(user, 'rootOrg.slug'),
     cache: true,
     async masterData({ user, req }) {
         try {

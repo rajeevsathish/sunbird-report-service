@@ -24,6 +24,8 @@ router.post(
     REPORT.CREATE.URL,
     setApiResponseId(REPORT.CREATE.API_ID),
     validate(REPORT.CREATE.VALIDATE.KEY, REPORT.CREATE.VALIDATE.PATH),
+    verifyToken({ tokenRequired: false }),
+    fetchUserDetails(),
     create
 )
 

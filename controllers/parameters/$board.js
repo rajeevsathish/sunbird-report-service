@@ -5,7 +5,7 @@ const { channelRead, frameworkRead } = require('../../helpers/learnerHelper');
 
 module.exports = {
     name: '$board',
-    value: (userData) => _.get(userData, 'userProfile.framework.board[0]'),
+    value: (user) => _.get(user, 'framework.board'),
     cache: false,
     async masterData({ user, req }) {
         try {

@@ -49,7 +49,7 @@ const getSharedAccessSignature = ({ container = container_name, filePath, header
 
             const token = blobService.generateSharedAccessSignature(container, filePath, sharedAccessPolicy, azureHeaders);
             const sasUrl = blobService.getUrl(container, filePath, token);
-            resolve(sasUrl);
+            resolve({ sasUrl, expiresAt: Date.parse(expiryDate), startDate });
         } catch (error) {
             reject(error);
         }
