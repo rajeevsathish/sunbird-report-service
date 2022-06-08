@@ -56,15 +56,25 @@ const search = async (req, res, next) => {
                 return row.type === CONSTANTS.REPORT_TYPE.PUBLIC;
             });
         } else {
-            //token present => check for both public, protected and private reports
+            /*
+            token is present. check for
+            1- if user is creator of report.
+            2- is user report admin or not.
+            3 - check access path for private and protected reports.
+            */
             filteredReports = _.filter(rows, row => {
+                const isCreator = isCreatorOfReport({ user: userDetails, report: row });
+                if (isCreator) return true;
+
                 if (!roleBasedAccess({ report: row, user: userDetails })) return false;
-                const { type } = row;
-                if (!type) return false;
+
                 if (accessPathMatchClosure) {
                     const isMatched = accessPathMatchClosure(row);
                     if (!isMatched) return false;
                 }
+
+                const { type } = row;
+                if (!type) return false;
                 if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
                 if ((type === CONSTANTS.REPORT_TYPE.PRIVATE) || (type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
                     return validateAccessPath(userDetails)(row);
@@ -187,6 +197,7 @@ const read = async (req, res, next) => {
     try {
         const { reportid, hash } = _.get(req, "params");
         const { fields, showChildren = 'true' } = req.query;
+
         const document = await report.findOne({
             where: {
                 reportid
@@ -206,24 +217,27 @@ const read = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
+        const { type } = document;
         const userDetails = req.userDetails;
-        const isCreator = isCreatorOfReport({ user: userDetails, report: document });
 
-        if (!isCreator) {
-            const isAllowed = roleBasedAccess({ report: document, user: userDetails });
-            if (!isAllowed) {
-                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        if (userDetails) {
+            const isCreator = isCreatorOfReport({ user: userDetails, report: document });
+            if (!isCreator) {
+                const isAllowed = roleBasedAccess({ report: document, user: userDetails });
+                if (!isAllowed) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
+
+                if ((type === CONSTANTS.REPORT_TYPE.PROTECTED) || (type === CONSTANTS.REPORT_TYPE.PRIVATE)) {
+                    const isAuthorized = validateAccessPath(userDetails)(document);
+                    if (!isAuthorized) {
+                        return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                    }
+                }
             }
-
-            if ((document.type === CONSTANTS.REPORT_TYPE.PROTECTED) || (document.type === CONSTANTS.REPORT_TYPE.PRIVATE)) {
-                if (!userDetails) {
-                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
-                }
-
-                const isAuthorized = validateAccessPath(userDetails)(document);
-                if (!isAuthorized) {
-                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
-                }
+        } else {
+            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || !roleBasedAccess({ report: document, user: userDetails })) {
+                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }
 
@@ -479,24 +493,27 @@ const readWithDatasets = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
+        const { type } = document;
         const user = req.userDetails;
-        const isCreator = isCreatorOfReport({ user, report: document });
 
-        if (!isCreator) {
-            const isAllowed = roleBasedAccess({ report: document, user });
-            if (!isAllowed) {
-                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        if (user) {
+            const isCreator = isCreatorOfReport({ user, report: document });
+            if (!isCreator) {
+                const isAllowed = roleBasedAccess({ report: document, user });
+                if (!isAllowed) {
+                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                }
+
+                if ((document.type === CONSTANTS.REPORT_TYPE.PRIVATE) || (document.type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
+                    const isAuthorized = validateAccessPath(user)(document);
+                    if (!isAuthorized) {
+                        return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+                    }
+                }
             }
-
-            if ((document.type === CONSTANTS.REPORT_TYPE.PRIVATE) || (document.type === CONSTANTS.REPORT_TYPE.PROTECTED)) {
-                if (!user) {
-                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
-                }
-
-                const isAuthorized = validateAccessPath(user)(document);
-                if (!isAuthorized) {
-                    return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
-                }
+        } else {
+            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || !roleBasedAccess({ report: document, user })) {
+                return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }
 

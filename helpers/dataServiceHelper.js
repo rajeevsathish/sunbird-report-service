@@ -5,7 +5,8 @@ var debug = require('debug')('helpers:dataServiceHelper');
 
 const { reportParameters } = require('../controllers/parameters');
 const { envVariables } = require('./envHelpers');
-const { dataServiceProxyUpstream } = require('./upstream_axios')
+const { dataServiceProxyUpstream } = require('./upstream_axios');
+const { isUserSuperAdmin } = require('./userHelper');
 
 const fetchDataset = ({ headers = {}, datasetId, params, ...rest }) => {
     const config = {
