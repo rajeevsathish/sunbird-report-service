@@ -37,10 +37,6 @@ const isCreatorOfReport = ({ user, report }) => _.get(report, 'createdby') === (
 const validateAccessPath = user => report => {
     let { accesspath, type } = report;
 
-    //creator of the report should have access in all the scenarios.
-    const isCreator = isCreatorOfReport({ user, report });
-    if (isCreator) return true;
-
     if (type === CONSTANTS.REPORT_TYPE.PUBLIC) return true;
 
     if (type === CONSTANTS.REPORT_TYPE.PROTECTED) {
@@ -106,6 +102,7 @@ const accessPathForPrivateReports = ({ user }) => {
  * @return {*} 
  */
 const roleBasedAccess = ({ report, user }) => {
+    if (!user) return false;
     const { status } = report;
     if ([CONSTANTS.REPORT_STATUS.DRAFT, CONSTANTS.REPORT_STATUS.RETIRED].includes(status)) {
         if (!isUserAdmin(user)) {
