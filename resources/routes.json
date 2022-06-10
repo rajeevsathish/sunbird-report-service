@@ -59,6 +59,14 @@
         "READ_WITH_DATASETS": {
             "URL": "/datasets/get/:reportid",
             "API_ID": "api.report.read"
+        },
+        "UPDATE_MANY": {
+            "URL": "/update",
+            "API_ID": "api.report.update",
+            "VALIDATE": {
+                "KEY": "report:update:many",
+                "PATH": "body"
+            }
         }
     },
     "SUMMARY": {
