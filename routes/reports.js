@@ -66,6 +66,13 @@ router.delete(
 );
 
 router.patch(
+    REPORT.UPDATE_MANY.URL,
+    setApiResponseId(REPORT.UPDATE_MANY.API_ID),
+    validate(REPORT.UPDATE_MANY.VALIDATE.KEY, REPORT.UPDATE_MANY.VALIDATE.PATH),
+    update
+);
+
+router.patch(
     REPORT.UPDATE.URL,
     setApiResponseId(REPORT.UPDATE.API_ID),
     validate(REPORT.UPDATE.VALIDATE.KEY, REPORT.UPDATE.VALIDATE.PATH),

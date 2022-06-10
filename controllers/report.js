@@ -258,19 +258,24 @@ const read = async (req, res, next) => {
 const update = async (req, res, next) => {
     try {
         const { reportid } = _.get(req, "params");
-        const { report: updatePayload, options = { returning: true } } = _.get(req, "body.request");
+        const { report: updatePayload, options = { returning: true }, query } = _.get(req, "body.request");
 
-        const exists = await reportExists(reportid);
-        if (!exists) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+        const queryPayload = {
+            ...(reportid && { reportid }),
+            ...(query && { ...query })
+        }
+
+        if (reportid) {
+            const exists = await reportExists(reportid);
+            if (!exists) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+        }
 
         await report.update(
             {
                 ...updatePayload
             },
             {
-                where: {
-                    reportid
-                },
+                where: queryPayload,
                 ...options
             });
 
