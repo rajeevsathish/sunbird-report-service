@@ -7,6 +7,7 @@ var debug = require('debug')('parameters:index');
 const { getSharedAccessSignature } = require('../../helpers/azure-storage');
 const { envVariables } = require('../../helpers/envHelpers');
 const { isUserSuperAdmin } = require('../../helpers/userHelper');
+const CONSTANTS = require('../../resources/constants.json')
 
 /*
 
@@ -74,48 +75,35 @@ const populateReportsWithParameters = (reports, user) => {
     return _.reduce(reports, (results, report) => {
         const isParameterized = isReportParameterized(report);
         report.isParameterized = isParameterized;
+
         if (isParameterized) {
-            const hash = getParametersHash(report, user);
-            if (isUserSuperAdmin(user)) {
-                results.push(report);
-            } else if (isUserAdmin(user)) {
-                const childReports = _.uniqBy(_.concat(_.filter(report.children, child => hash.includes(child.hashed_val)), _.map(hash, hashed_val => ({
-                    hashed_val,
-                    status: "draft",
-                    reportid: _.get(report, 'reportid'),
-                    materialize: true
-                }))), 'hashed_val');
-                if (childReports.length) {
-                    if (childReports.length === 1) {
-                        delete report.children;
-                        results.push(_.assign(report, _.omit(childReports[0], 'id')));
-                    } else {
-                        report.children = childReports;
-                        results.push(report);
-                    }
-                }
-            } else {
-                const childReports = _.filter(report.children, child => hash.includes(child.hashed_val) && child.status === 'live');
-                if (childReports.length) {
-                    if (childReports.length === 1) {
-                        delete report.children;
-                        results.push(_.assign(report, _.omit(childReports[0], 'id')));
-                    } else {
-                        report.children = childReports;
-                        results.push(report);
+            if (user) {
+                const hash = getParametersHash(report, user);
+                if (isUserSuperAdmin(user)) {
+                    results.push(report);
+                } else {
+                    const childReports = _.uniqBy(_.concat(_.filter(_.get(report, 'children'), child => hash.includes(_.get(child, 'hashed_val'))),
+                        _.map(hash, hashed_val => ({
+                            hashed_val,
+                            status: CONSTANTS.REPORT_STATUS.DRAFT,
+                            reportid: _.get(report, 'reportid'),
+                            materialize: true
+                        }))), 'hashed_val');
+
+                    if (childReports.length) {
+                        if (childReports.length === 1) {
+                            const mergedReport = _.assign(report.dataValues, _.pick(_.get(childReports, '[0].dataValues'), ['status']));
+                            results.push(mergedReport);
+                        } else {
+                            report.children = childReports;
+                            results.push(report);
+                        }
                     }
                 }
             }
         }
         else {
-            delete report.children;
-            if (!isUserAdmin(user)) {
-                if (report.status === 'live') {
-                    results.push(report);
-                }
-            } else {
-                results.push(report);
-            }
+            results.push(report);
         }
         return results;
     }, []);
@@ -216,4 +204,4 @@ const getDatasets = async ({ document, user, req }) => {
     return Promise.all(dataSources.map(dataSource => getDataset({ dataSource, user, req })));
 }
 
-module.exports = { populateReportsWithParameters, getDatasets, reportParameters: parameters }
+module.exports = { populateReportsWithParameters, getDatasets, reportParameters: parameters, isReportParameterized }

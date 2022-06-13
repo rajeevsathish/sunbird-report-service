@@ -61,7 +61,7 @@
             "API_ID": "api.report.read"
         },
         "UPDATE_MANY": {
-            "URL": "/update",
+            "URL": "/updateMany",
             "API_ID": "api.report.update",
             "VALIDATE": {
                 "KEY": "report:update:many",
