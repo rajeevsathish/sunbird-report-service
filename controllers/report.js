@@ -8,7 +8,7 @@ const { report, report_status, report_summary } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
 const { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport, roleBasedAccess } = require("./accessPaths");
-const { getDatasets } = require("./parameters");
+const { getDatasets, isReportParameterized } = require("./parameters");
 const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
 // checks by reportid if the report exists in our database or not
@@ -46,14 +46,14 @@ const search = async (req, res, next) => {
         let filteredReports = [];
         const userDetails = req.userDetails;
         if (!userDetails) {
-            //token absent => check only public reports
+            //token absent => check only public & live reports & non parameterized reports
             filteredReports = _.filter(rows, row => {
-                if (!roleBasedAccess({ report: row, user: userDetails })) return false;
                 if (accessPathMatchClosure) {
                     const isMatched = accessPathMatchClosure(row);
                     if (!isMatched) return false;
                 }
-                return row.type === CONSTANTS.REPORT_TYPE.PUBLIC;
+                const isParameterized = isReportParameterized(row);
+                return !isParameterized && row.type === CONSTANTS.REPORT_TYPE.PUBLIC && row.status === CONSTANTS.REPORT_STATUS.LIVE;
             });
         } else {
             /*
@@ -217,8 +217,9 @@ const read = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
-        const { type } = document;
+        const { type, status } = document;
         const userDetails = req.userDetails;
+        const isParameterized = isReportParameterized(document);
 
         if (userDetails) {
             const isCreator = isCreatorOfReport({ user: userDetails, report: document });
@@ -236,7 +237,7 @@ const read = async (req, res, next) => {
                 }
             }
         } else {
-            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || !roleBasedAccess({ report: document, user: userDetails })) {
+            if (isParameterized || type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
                 return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }
@@ -498,8 +499,10 @@ const readWithDatasets = async (req, res, next) => {
 
         if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
-        const { type } = document;
+
         const user = req.userDetails;
+        const isParameterized = isReportParameterized(document);
+        const { type, status } = document;
 
         if (user) {
             const isCreator = isCreatorOfReport({ user, report: document });
@@ -517,7 +520,7 @@ const readWithDatasets = async (req, res, next) => {
                 }
             }
         } else {
-            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || !roleBasedAccess({ report: document, user })) {
+            if (isParameterized || type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
                 return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }

@@ -216,4 +216,4 @@ const getDatasets = async ({ document, user, req }) => {
     return Promise.all(dataSources.map(dataSource => getDataset({ dataSource, user, req })));
 }
 
-module.exports = { populateReportsWithParameters, getDatasets, reportParameters: parameters }
+module.exports = { populateReportsWithParameters, getDatasets, reportParameters: parameters, isReportParameterized }
