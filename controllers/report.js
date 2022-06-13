@@ -8,7 +8,7 @@ const { report, report_status, report_summary } = require('../models');
 const CONSTANTS = require('../resources/constants.json');
 const { formatApiResponse } = require('../helpers/responseFormatter');
 const { validateAccessPath, matchAccessPath, accessPathForPrivateReports, isCreatorOfReport, roleBasedAccess } = require("./accessPaths");
-const { getDatasets, isReportParameterized } = require("./parameters");
+const { getDatasets, isReportParameterized, populateReportsWithParameters } = require("./parameters");
 const { fetchAndFormatExhaustDataset } = require("../helpers/dataServiceHelper");
 
 // checks by reportid if the report exists in our database or not
@@ -23,7 +23,7 @@ const reportExists = async (reportid) => report.findOne({ where: { reportid } })
  */
 const search = async (req, res, next) => {
     try {
-        const { filters = {}, options = { showChildren: true } } = req.body.request;
+        const { filters = {}, options = {} } = req.body.request;
         const { accesspath, ...otherFilters } = filters;
 
         let { rows } = await report.findAndCountAll({
@@ -33,27 +33,26 @@ const search = async (req, res, next) => {
                 }
             }),
             order: [['createdon', 'DESC']],
-            ...(options.showChildren && {
-                include: { model: report_status, required: false, as: 'children' }
-            }),
+            include: { model: report_status, required: false, as: 'children' },
             ...options
         });
+
+        const userDetails = req.userDetails;
+        const documents = populateReportsWithParameters(rows, userDetails);
 
         //is accesspath is provided as search filter create a closure to filter reports
         const accessPathMatchClosure = accesspath && matchAccessPath(accesspath);
 
         //check if x-authenticated-user-token is provided. If not return only public reports else validate accesspaths.
         let filteredReports = [];
-        const userDetails = req.userDetails;
         if (!userDetails) {
             //token absent => check only public & live reports & non parameterized reports
-            filteredReports = _.filter(rows, row => {
+            filteredReports = _.filter(documents, row => {
                 if (accessPathMatchClosure) {
                     const isMatched = accessPathMatchClosure(row);
                     if (!isMatched) return false;
                 }
-                const isParameterized = isReportParameterized(row);
-                return !isParameterized && row.type === CONSTANTS.REPORT_TYPE.PUBLIC && row.status === CONSTANTS.REPORT_STATUS.LIVE;
+                return row.type === CONSTANTS.REPORT_TYPE.PUBLIC && row.status === CONSTANTS.REPORT_STATUS.LIVE;
             });
         } else {
             /*
@@ -62,7 +61,7 @@ const search = async (req, res, next) => {
             2- is user report admin or not.
             3 - check access path for private and protected reports.
             */
-            filteredReports = _.filter(rows, row => {
+            filteredReports = _.filter(documents, row => {
                 const isCreator = isCreatorOfReport({ user: userDetails, report: row });
                 if (isCreator) return true;
 
@@ -198,7 +197,7 @@ const read = async (req, res, next) => {
         const { reportid, hash } = _.get(req, "params");
         const { fields, showChildren = 'true' } = req.query;
 
-        const document = await report.findOne({
+        const rawDocument = await report.findOne({
             where: {
                 reportid
             },
@@ -215,11 +214,13 @@ const read = async (req, res, next) => {
             })
         });
 
-        if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+        if (!rawDocument) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+
+        const userDetails = req.userDetails;
+        const [document] = populateReportsWithParameters([rawDocument], userDetails);
+        if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
 
         const { type, status } = document;
-        const userDetails = req.userDetails;
-        const isParameterized = isReportParameterized(document);
 
         if (userDetails) {
             const isCreator = isCreatorOfReport({ user: userDetails, report: document });
@@ -237,7 +238,7 @@ const read = async (req, res, next) => {
                 }
             }
         } else {
-            if (isParameterized || type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
+            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
                 return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }
@@ -480,7 +481,7 @@ const readWithDatasets = async (req, res, next) => {
     try {
         const { reportid, hash } = _.get(req, "params");
         const { fields, showChildren = 'true' } = req.query;
-        const document = await report.findOne({
+        let rawDocument = await report.findOne({
             where: {
                 reportid
             },
@@ -497,11 +498,12 @@ const readWithDatasets = async (req, res, next) => {
             })
         });
 
-        if (!document) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
-
+        if (!rawDocument) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
         const user = req.userDetails;
-        const isParameterized = isReportParameterized(document);
+        const [document] = populateReportsWithParameters([rawDocument], user);
+        if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+
         const { type, status } = document;
 
         if (user) {
@@ -520,7 +522,7 @@ const readWithDatasets = async (req, res, next) => {
                 }
             }
         } else {
-            if (isParameterized || type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
+            if (type !== CONSTANTS.REPORT_TYPE.PUBLIC || status !== CONSTANTS.REPORT_STATUS.LIVE) {
                 return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
             }
         }
