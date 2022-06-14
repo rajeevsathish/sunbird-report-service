@@ -46,6 +46,14 @@ router.get(
 );
 
 router.get(
+    REPORT.READ_HASH_WITH_DATASETS.URL,
+    setApiResponseId(REPORT.READ_HASH_WITH_DATASETS.API_ID),
+    verifyToken({ tokenRequired: false }),
+    fetchUserDetails(),
+    readWithDatasets
+);
+
+router.get(
     REPORT.READ_HASH.URL,
     setApiResponseId(REPORT.READ_HASH.API_ID),
     verifyToken({ tokenRequired: false }),

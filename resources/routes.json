@@ -60,6 +60,10 @@
             "URL": "/datasets/get/:reportid",
             "API_ID": "api.report.read"
         },
+        "READ_HASH_WITH_DATASETS": {
+            "URL": "/datasets/get/:reportid/:hash",
+            "API_ID": "api.report.read"
+        },
         "UPDATE_MANY": {
             "URL": "/updateMany",
             "API_ID": "api.report.update",
