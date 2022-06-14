@@ -92,7 +92,7 @@ const populateReportsWithParameters = (reports, user) => {
 
                     if (childReports.length) {
                         if (childReports.length === 1) {
-                            const mergedReport = _.assign(report.dataValues, _.pick(_.get(childReports, '[0].dataValues'), ['status']));
+                            const mergedReport = _.assign(report.dataValues, _.pick(_.get(childReports, '[0].dataValues'), ['status', 'hashed_val']));
                             results.push(mergedReport);
                         } else {
                             report.children = childReports;
