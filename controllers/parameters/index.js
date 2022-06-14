@@ -51,7 +51,7 @@ const getParameterValue = (param, user) => {
         return parameters[param].value(user)
     }
 
-    throw new Error('invalid parameter');
+    return null;
 }
 
 /**
