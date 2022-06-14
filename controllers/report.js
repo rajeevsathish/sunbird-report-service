@@ -197,7 +197,7 @@ const read = async (req, res, next) => {
         const { reportid, hash } = _.get(req, "params");
         const { fields, showChildren = 'true' } = req.query;
 
-        const rawDocument = await report.findOne({
+        let rawDocument = await report.findOne({
             where: {
                 reportid
             },
@@ -216,9 +216,24 @@ const read = async (req, res, next) => {
 
         if (!rawDocument) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
+        if (hash) {
+            if (_.get(rawDocument, 'children.length')) {
+                const reportWithoutChildren = _.omit(rawDocument, 'children');
+                rawDocument = _.assign(_.get(reportWithoutChildren, 'dataValues'), _.omit(_.get(rawDocument, 'children[0].dataValues'), ['id', 'reportid']));
+            } else {
+                return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+            }
+        }
+
+
         const userDetails = req.userDetails;
-        const [document] = populateReportsWithParameters([rawDocument], userDetails);
-        if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        let document;
+        if (!hash) {
+            [document] = populateReportsWithParameters([rawDocument], userDetails);
+            if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        } else {
+            document = rawDocument;
+        }
 
         const { type, status } = document;
 
@@ -481,6 +496,7 @@ const readWithDatasets = async (req, res, next) => {
     try {
         const { reportid, hash } = _.get(req, "params");
         const { fields, showChildren = 'true' } = req.query;
+
         let rawDocument = await report.findOne({
             where: {
                 reportid
@@ -500,9 +516,23 @@ const readWithDatasets = async (req, res, next) => {
 
         if (!rawDocument) return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
 
+        if (hash) {
+            if (_.get(rawDocument, 'children.length')) {
+                const reportWithoutChildren = _.omit(rawDocument, 'children');
+                rawDocument = _.assign(_.get(reportWithoutChildren, 'dataValues'), _.omit(_.get(rawDocument, 'children[0].dataValues'), ['id', 'reportid']));
+            } else {
+                return next(createError(404, CONSTANTS.MESSAGES.NO_REPORT));
+            }
+        }
+
         const user = req.userDetails;
-        const [document] = populateReportsWithParameters([rawDocument], user);
-        if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        let document;
+        if (!hash) {
+            [document] = populateReportsWithParameters([rawDocument], user);
+            if (!document) return next(createError(401, CONSTANTS.MESSAGES.FORBIDDEN));
+        } else {
+            document = rawDocument;
+        }
 
         const { type, status } = document;
 
