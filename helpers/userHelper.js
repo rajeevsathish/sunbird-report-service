@@ -26,7 +26,7 @@ const userRead = ({ userId, headers = {} }) => {
 const isUserAdmin = (user) => {
     const userRoles = _.get(user, 'roles') || [];
     const userRolesSet = _.map(userRoles, 'role');
-    return _.includes(userRolesSet, 'REPORT_ADMIN')
+    return _.includes(userRolesSet, 'REPORT_ADMIN','PROGRAM_MANAGER','PROGRAM_DESIGNER')
 };
 
 
