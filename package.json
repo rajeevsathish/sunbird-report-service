@@ -23,7 +23,7 @@
     "@hapi/joi": "^17.1.1",
     "body-parser": "^1.19.0",
     "dateformat": "^3.0.3",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-promise-router": "^3.0.3",
     "lodash": "^4.17.15",
     "pg": "^8.0.0",
