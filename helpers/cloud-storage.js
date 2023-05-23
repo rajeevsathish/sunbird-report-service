@@ -14,7 +14,7 @@ let cloudConfig = {
 let cloudClient = cloudService.init(envVariables.sunbird_cloud_storage_provider);
 const storageService = new cloudClient(cloudConfig);
 
-const getSharedAccessSignature = ({ container = container_name, filePath, headers = {}, expiryTime = sasExpiryTime }) => {
+const getSharedAccessSignature = ({ container = cloudConfig.reportsContainer, filePath, headers = {}, expiryTime = sasExpiryTime }) => {
     return new Promise((resolve, reject) => {
         try {
             const startDate = new Date();
