@@ -22,8 +22,8 @@ const getSharedAccessSignature = ({ container = container_name, filePath, header
             expiryDate.setMinutes(startDate.getMinutes() + expiryTime);
             startDate.setMinutes(startDate.getMinutes() - expiryTime);
 
-            const sginedUrl = storageService.getSignedUrl(container, filePath, expiryDate)
-            resolve({ sginedUrl, expiresAt: Date.parse(expiryDate), startDate });
+            const signedUrl = storageService.getSignedUrl(container, filePath, expiryDate)
+            resolve({ signedUrl, expiresAt: Date.parse(expiryDate), startDate });
         } catch (error) {
             reject(error);
         }
