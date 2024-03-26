@@ -4,7 +4,7 @@ const path = require('path');
 var memoryCache = require('memory-cache');
 var debug = require('debug')('parameters:index');
 
-const { getSharedAccessSignature } = require('../../helpers/azure-storage');
+const { getSharedAccessSignature } = require('../../helpers/cloud-storage');
 const { envVariables } = require('../../helpers/envHelpers');
 const { isUserSuperAdmin } = require('../../helpers/userHelper');
 const CONSTANTS = require('../../resources/constants.json')

@@ -50,7 +50,14 @@ const envVariables = {
         LEARNER: env.sunbird_learner_player_url,
         CONTENT_PROXY: env.sunbird_content_proxy_url,
         DATA_SERVICE: env.sunbird_dataservice_url
-    }
+    },
+    sunbird_cloud_storage_provider: env.sunbird_cloud_storage_provider || 'azure',
+    sunbird_cloud_storage_key: env.cloud_private_storage_accountname,
+    sunbird_cloud_storage_secret: env.cloud_private_storage_secret,
+    sunbird_cloud_storage_container: env.cloud_storage_privatereports_bucketname || 'reports',
+    sunbird_cloud_storage_labels: env.cloud_storage_resourceBundle_bucketname || 'label',
+    sunbird_cloud_storage_region: env.cloud_private_storage_region || '',
+    sunbird_cloud_storage_project: env.cloud_private_storage_project || '',
 }
 
 module.exports = { envVariables, packageObj, printEnvVariablesStatus };
