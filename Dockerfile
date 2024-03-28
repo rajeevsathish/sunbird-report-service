@@ -1,4 +1,4 @@
-FROM node:8.11-alpine
+FROM node:14.18.1-slim
 RUN apk update \
     && mkdir -p /opt/report
 COPY . /opt/report/
