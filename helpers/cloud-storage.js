@@ -5,6 +5,7 @@ const cloudService = require('client-cloud-services');
 if (!envVariables.sunbird_cloud_storage_provider) throw new Error("Cloud Storage Service - Provider is not initialized");
 
 let cloudConfig = {
+    provider: envVariables.sunbird_cloud_storage_provider,
     identity: envVariables.sunbird_cloud_storage_key,
     credential: envVariables.sunbird_cloud_storage_secret,
     reportsContainer: envVariables.sunbird_cloud_storage_container,
