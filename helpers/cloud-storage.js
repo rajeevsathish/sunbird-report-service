@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { envVariables } = require('./envHelpers');
+const cloudService = require('client-cloud-services');
 
 if (!envVariables.sunbird_cloud_storage_provider) throw new Error("Cloud Storage Service - Provider is not initialized");
 
