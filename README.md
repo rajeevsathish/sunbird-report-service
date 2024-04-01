@@ -1,9 +1,10 @@
-# sunbird-report-service
-Report Service
-The Report Service provides capabilities to create and consume reports on the front user interfaces/user apps. The reports are rendered and managed through report configurations.
+# Report Service (sunbird-report-service)  
+
+The Report Service provides capabilities to create and consume reports on the front user interfaces/user apps. The reports are rendered and managed through report configurations.  
 
 ## Architecture
-![Core architecture of report service](./docs/architecture-1.png)
+![Core architecture of report service](./docs/architecture-1.png)  
+[reference doc](https://obsrv.sunbird.org/previous-versions/sb-5.0-version/learn/product-and-developer-guide/report-service)
 
 ### Key Features:
 Scalable rendering: The report configuration and data files are rendered from a cloud storage or a CDN which supports large number of concurrent users accessing the reports from the front end user interface.
@@ -14,7 +15,9 @@ Decoupling: Visualization (charts) and data are decoupled. This allows the syste
 
 ![Infra Architecture](./docs/architecture.png)
 
-![Report configuration using Superset](./docs/report-configuration-superset.png.png)
+### Report configurator
+Configuring the ad-hock reports using superset(Based on the requirement reports can be configured through superset)  
+![Report configuration using Superset](./docs/report-configuration-superset.png)
 
 ## Local developement steps
 
@@ -29,7 +32,8 @@ Decoupling: Visualization (charts) and data are decoupled. This allows the syste
 ## API documentation
 https://app.swaggerhub.com/apis/hawkeye7/hawkeyeNew/1.0.0#/info
 
-## Devops Repo config changes for any new environment add/delete for the service
-https://github.com/project-sunbird/sunbird-devops/blob/release-6.0.0/ansible/roles/stack-sunbird/templates/sunbird_report-service.env
+## Devops - Config map for report-service
+The report-service configuration values will be take from the below devops public repo while deploying the service.  
+[Devops public repo config map for report-service](https://github.com/project-sunbird/sunbird-devops/blob/release-6.0.0/ansible/roles/stack-sunbird/templates/sunbird_report-service.env)
 
-All the service configuration values will be take from the above while deploying the service
+
