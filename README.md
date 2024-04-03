@@ -30,7 +30,8 @@ Configuring the ad-hock reports using superset(Based on the requirement reports 
 
 
 ## API documentation
-https://app.swaggerhub.com/apis/hawkeye7/hawkeyeNew/1.0.0#/info
+[Postman Collection](https://documenter.getpostman.com/view/5394404/SztG2R1T?version=latest)
+[Swagger Documentation](https://app.swaggerhub.com/apis/hawkeye7/hawkeyeNew/1.0.0#/info)
 
 ## Devops - Config map for report-service
 The report-service configuration values will be take from the below devops public repo while deploying the service.  
