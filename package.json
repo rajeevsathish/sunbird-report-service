@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": ">=7.8.0"
+    "node": ">=14.19.0"
   },
   "keywords": [
     "sunbird",
@@ -22,7 +22,7 @@
     "axios": "^0.27.2",
     "axios-debug-log": "^0.8.4",
     "azure-storage": "^2.10.7",
-    "client-cloud-services": "^2.0.6",
+    "client-cloud-services": "3.0.4",
     "cookie-parser": "~1.4.4",
     "cross-env": "^7.0.3",
     "debug": "~2.6.9",
