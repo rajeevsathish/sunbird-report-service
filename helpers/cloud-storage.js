@@ -14,6 +14,7 @@ let cloudConfig = {
     projectId: envVariables.sunbird_cloud_storage_project,
     endpoint:envVariables.sunbird_cloud_storage_endpoint  
 };
+console.log('Testing the config----->',cloudConfig);
 let cloudClient = cloudService.init(cloudConfig);
 const storageService =  cloudClient;//new cloudClient(cloudConfig);
 
