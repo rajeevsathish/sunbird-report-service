@@ -58,6 +58,7 @@ const envVariables = {
     sunbird_cloud_storage_labels: env.cloud_storage_resourceBundle_bucketname || 'label',
     sunbird_cloud_storage_region: env.cloud_private_storage_region || '',
     sunbird_cloud_storage_project: env.cloud_private_storage_project || '',
+    sunbird_cloud_storage_endpoint:env.cloud_private_storage_endpoint || ''
 }
 
 module.exports = { envVariables, packageObj, printEnvVariablesStatus };
