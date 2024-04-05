@@ -9,7 +9,6 @@ const packageObj = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const printEnvVariablesStatus = () => {
     debug('Service environment variables', JSON.stringify(envVariables));
 }
-console.log('The env value is --->', env);
 const envVariables = {
     DB: {
         HOST: env.SUNBIRD_REPORTS_DB_HOST || 'localhost',
